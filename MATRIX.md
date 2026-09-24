@@ -1,0 +1,121 @@
+# Capability matrix
+
+> Generated from [`data/capabilities.csv`](data/capabilities.csv) by `scripts/render_matrix.py`. Do not edit by hand.
+
+**Legend.** ✅ works · 🟡 partial · ❌ fails · 🔌 needs hardware/ports not present · ⬜ untested. **Evidence:** MEASURED (this unit, with a log) · INVENTORY (seen on the system, not exercised) · DOCUMENTED (vendor docs, not verified here) · PLANNED · UNKNOWN.
+
+## Progress
+
+| Status | Rows | Share |
+|---|---:|---:|
+| ✅ WORKS | 16 | 28% |
+| 🟡 PARTIAL | 8 | 14% |
+| ❌ FAILS | 2 | 3% |
+| 🔌 NEEDS-HW | 4 | 7% |
+| ⬜ UNTESTED | 28 | 48% |
+| **Total** | **58** | |
+
+## A compute
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| A01 | GPU initialises on cold boot | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | 2 failures in 18 automated cold boots; 0 in 5 warm reboots | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
+| A02 | GPU initialises on cold boot | orin-nano-8g | 3 | 🟡 PARTIAL | MEASURED | 1 failure in 18 automated cold boots (+1 earlier unlogged); 0 in 5 warm reboots | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
+| A03 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nx-16g | 2 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
+| A04 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nano-8g | 3 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
+| A05 | NPU kernel driver present | rk3588 | 1 | 🟡 PARTIAL | INVENTORY | /dev/dri/card1 = RKNPU; npu@fdab0000 okay; CONFIG_ROCKCHIP_RKNPU=y; no userland runtime installed |  |
+| A06 | LLM inference (CUDA) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
+| A07 | LLM inference (CUDA) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
+| A08 | LLM inference (NPU via RKLLM) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A09 | LLM inference (CPU only) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A10 | LLM inference (Mali-G610 via Vulkan/OpenCL) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
+| A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
+| A13 | Vision inference (RKNN) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A14 | DLA offload | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
+| A15 | DLA offload | orin-nano-8g | 3 | ⬜ UNTESTED | DOCUMENTED |  |  |
+| A16 | Energy per token (power rails) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
+| A17 | Energy per token (power rails) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
+| A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+
+## B cluster
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| B01 | Shared WiFi gateway (DHCP+DNS+NAT) hosted on one node | rk3588 | 1 | ✅ WORKS | MEASURED | nodes 2,3 + BMC route through node 1's WiFi; survives node-1 reboot and full-board cold start | [2026-09-24_wifi-gateway-network](logs/2026-09-24_wifi-gateway-network.md) |
+| B02 | Model endpoint routing across nodes | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
+| B03 | Model split across nodes (llama.cpp RPC) over 1 GbE | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
+| B04 | Kubernetes (k3s) with GPU and NPU device plugins | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
+
+## C infra
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| C01 | BMC remote control via tpi (power/USB/UART/flash) | bmc |  | ✅ WORKS | MEASURED | tpi 1.0.7 against BMC firmware 2.3.2 | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
+| C02 | BMC reboot restores node power state | bmc |  | ✅ WORKS | MEASURED | BMC back in ~55 s; note: reboot cuts power to all nodes | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
+| C03 | Local storage node (1 TB NVMe) with checksum-verified I/O | rk3588 | 1 | ✅ WORKS | MEASURED | 1.2 GB/s write / 1.8 GB/s read (dd, direct I/O, single run) | [2026-09-24_node1-nvme-storage](logs/2026-09-24_node1-nvme-storage.md) |
+| C04 | NFS model store shared to the other nodes | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| C05 | Monitoring (Prometheus/Grafana) | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
+| C06 | ARM64 CI/build runner | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| C07 | Remote access as subnet router (Tailscale) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+
+## D media/sensing
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| D01 | HDMI output | rk3588 | 1 | ✅ WORKS | MEASURED | RK1 desktop captured over HDMI (factory image) |  |
+| D02 | USB 2.0 host (Wi-Fi dongle RTL8822BU) | rk3588 | 1 | 🟡 PARTIAL | MEASURED | in-kernel rtw88: FAILS (register timeouts -110); vendor 88x2bu: WORKS (5 GHz, 867 Mbit/s link) | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| D03 | USB 3.0 host | any | 4 | 🔌 NEEDS-HW | DOCUMENTED |  |  |
+| D04 | Camera (CSI/DSI) | any | 1 | 🔌 NEEDS-HW | DOCUMENTED |  |  |
+| D05 | CAN bus | orin-nx-16g | 2 | 🔌 NEEDS-HW | INVENTORY | can0 interface present |  |
+| D06 | GPIO / I2C / SPI header | any |  | ⬜ UNTESTED | UNKNOWN |  |  |
+| D07 | Hardware video encode | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
+| D08 | Hardware video encode | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+
+## E storage/PCIe
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| E01 | M.2 NVMe (PCIe Gen3 x4) | rk3588 | 1 | ✅ WORKS | MEASURED | link up; 1.2/1.8 GB/s | [2026-09-24_node1-nvme-storage](logs/2026-09-24_node1-nvme-storage.md) |
+| E02 | M.2 NVMe (PCIe Gen3 x4) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Gen.3 x4 link up (kernel log) |  |
+| E03 | M.2 NVMe | orin-nano-8g | 3 | ✅ WORKS | MEASURED | boots OS from it |  |
+| E04 | SATA controller | orin-nano-8g | 3 | 🟡 PARTIAL | MEASURED | ASM1061 enumerated; no drive attached |  |
+| E05 | mini-PCIe: PCIe function (AR9462 Wi-Fi) | rk3588 | 1 | ❌ FAILS | MEASURED | all three RK3588 x1 controllers tested: link never trains; forced Gen1 also fails | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| E06 | mini-PCIe: PCIe function (AR9462 Wi-Fi) | orin-nx-16g | 2 | ❌ FAILS | MEASURED | both empty x1 controllers report 'Phy link never came up' | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| E07 | mini-PCIe: USB function (Bluetooth AR3012) | rk3588 | 1 | ✅ WORKS | MEASURED | 0cf3:311e enumerates | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| E08 | mini-PCIe: USB function (Bluetooth AR3012) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 0cf3:311e enumerates | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| E09 | mini-PCIe: other PCIe card | any | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| E10 | M.2 accelerator card (e.g. Hailo) | any |  | 🔌 NEEDS-HW | PLANNED |  |  |
+
+## F low-level
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| F01 | Boot foreign-carrier modules on this board (QSPI-only reflash) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | boots existing NVMe OS after fix; NVMe untouched | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
+| F02 | Boot foreign-carrier modules on this board (QSPI-only reflash) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | same; restore round-trip verified | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
+| F03 | Restore original QSPI from backup | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 10 partitions restored and verified by read-back | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
+| F04 | Device-tree overlay on RK1 (u-boot fdtoverlays) | rk3588 | 1 | ✅ WORKS | MEASURED | overlay applied and reverted cleanly | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
+| F05 | NVMe unsafe-shutdown counter behaviour | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | +1 unsafe shutdown and +2 power cycles per cold boot; 0 per warm reboot; independent of shutdown wait (~15-20 s vs 90 s) | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
+| F06 | Custom kernel / DVFS / thermal soak | any |  | ⬜ UNTESTED | PLANNED |  |  |
+| F07 | Secure boot / fuses | any |  | ⬜ UNTESTED | PLANNED |  |  |
+
+## G reliability
+
+| ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
+|---|---|---|:-:|---|---|---|---|
+| G01 | Full-board cold start integrity | any |  | ✅ WORKS | MEASURED | all filesystems clean; NVMe critical_warning 0, media_errors 0 | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
+| G02 | GPU self-heal service | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 1 real GPU failure recovered without intervention in ~165 s; forced test: 2 reboots then gives up | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
+| G03 | Fault injection (power loss mid-write) | any |  | ⬜ UNTESTED | PLANNED |  |  |
+| G04 | Hardware watchdog | any |  | ⬜ UNTESTED | PLANNED |  |  |
+
+## Slot coverage
+
+Each chip can only reach the ports of the slot it sits in ([port map](docs/PORT-MAP.md)), so a feature is only fully explored once every chip has been tested in every slot that offers it. Cells show the session in which a chip was tested in a slot.
+
+| Chip | Slot 1 | Slot 2 | Slot 3 | Slot 4 |
+|---|:-:|:-:|:-:|:-:|
+| Turing RK1 (RK3588) | S1 | · | · | · |
+| Jetson Orin NX 16GB | · | S1 | · | · |
+| Jetson Orin Nano 8GB | · | · | S1 | · |
+
+**3 of 12** chip-in-slot combinations tested. Protocol for the rest: [rotation protocol](docs/PORT-MAP.md#rotation-protocol).
