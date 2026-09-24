@@ -53,7 +53,7 @@
 |---|---|---|:-:|---|---|---|---|
 | C01 | BMC remote control via tpi (power/USB/UART/flash) | bmc |  | ✅ WORKS | MEASURED | tpi 1.0.7 against BMC firmware 2.3.2 | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
 | C02 | BMC reboot restores node power state | bmc |  | ✅ WORKS | MEASURED | BMC back in ~55 s; note: reboot cuts power to all nodes | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
-| C03 | Local storage node (1 TB NVMe) with checksum-verified I/O | rk3588 | 1 | ✅ WORKS | MEASURED | 1.2 GB/s write / 1.8 GB/s read (dd, direct I/O, single run) | [2026-09-24_node1-nvme-storage](logs/2026-09-24_node1-nvme-storage.md) |
+| C03 | Local storage node (1 TB NVMe) with checksum-verified I/O | rk3588 | 1 | ✅ WORKS | MEASURED | fio 3 reps: seq write 1765 MB/s, rand write QD1 41k IOPS, rand read QD32 140k IOPS (supersedes dd 1.2/1.8 GB/s) | [2026-09-24_nvme-fio-all-nodes](logs/2026-09-24_nvme-fio-all-nodes.md) |
 | C04 | NFS model store shared to the other nodes | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | C05 | Monitoring (Prometheus/Grafana) | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
 | C06 | ARM64 CI/build runner | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
@@ -76,9 +76,9 @@
 
 | ID | Feature | Chip | Slot | Status | Evidence | Result | Log |
 |---|---|---|:-:|---|---|---|---|
-| E01 | M.2 NVMe (PCIe Gen3 x4) | rk3588 | 1 | ✅ WORKS | MEASURED | link up; 1.2/1.8 GB/s | [2026-09-24_node1-nvme-storage](logs/2026-09-24_node1-nvme-storage.md) |
-| E02 | M.2 NVMe (PCIe Gen3 x4) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Gen.3 x4 link up (kernel log) |  |
-| E03 | M.2 NVMe | orin-nano-8g | 3 | ✅ WORKS | MEASURED | boots OS from it |  |
+| E01 | M.2 NVMe (PCIe Gen3 x4) | rk3588 | 1 | ✅ WORKS | MEASURED | fio: seq write 1765 MB/s; seq read 2432 first rep then ~715; rand read 4k QD1 14.1k IOPS; 3 reps | [2026-09-24_nvme-fio-all-nodes](logs/2026-09-24_nvme-fio-all-nodes.md) |
+| E02 | M.2 NVMe (PCIe Gen3 x4) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | fio: seq write 994 MB/s (435 in rep 3); seq read 2440 then ~727; rand read QD32 158k IOPS; 3 reps | [2026-09-24_nvme-fio-all-nodes](logs/2026-09-24_nvme-fio-all-nodes.md) |
+| E03 | M.2 NVMe | orin-nano-8g | 3 | ✅ WORKS | MEASURED | fio: seq write 995 MB/s (429 in rep 3); seq read 2358 then ~728; rand read QD32 124k IOPS; 3 reps | [2026-09-24_nvme-fio-all-nodes](logs/2026-09-24_nvme-fio-all-nodes.md) |
 | E04 | SATA controller | orin-nano-8g | 3 | 🟡 PARTIAL | MEASURED | ASM1061 enumerated; no drive attached |  |
 | E05 | mini-PCIe: PCIe function (AR9462 Wi-Fi) | rk3588 | 1 | ❌ FAILS | MEASURED | all three RK3588 x1 controllers tested: link never trains; forced Gen1 also fails | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
 | E06 | mini-PCIe: PCIe function (AR9462 Wi-Fi) | orin-nx-16g | 2 | ❌ FAILS | MEASURED | both empty x1 controllers report 'Phy link never came up' | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |

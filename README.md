@@ -32,6 +32,7 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 - Full-board restart integrity, and what the NVMe "unsafe shutdown" counter really counts: [log](logs/2026-09-24_full-board-reboot-integrity.md)
 - One node as the gateway for the whole board: [log](logs/2026-09-24_wifi-gateway-network.md)
 - A first storage figure for the RK1's NVMe: [log](logs/2026-09-24_node1-nvme-storage.md)
+- fio on the NVMe of all three nodes (same drive model, same link): host-dependent write speed and a read-throughput state effect on all three: [log](logs/2026-09-24_nvme-fio-all-nodes.md)
 
 ## Method in one paragraph
 
@@ -39,7 +40,7 @@ Nothing counts as a result without a dated log. Statuses never claim more than t
 
 ## Limits of this study
 
-One board, one unit of each module, a consumer laptop as the driving host. Nothing here is a statement about the wider population of boards or modules. Throughput figures so far are from single `dd` runs and are indicative only.
+One board, one unit of each module, a consumer laptop as the driving host. Nothing here is a statement about the wider population of boards or modules. Storage figures are from three-repetition fio runs; other figures may still be single runs and are indicative only.
 
 ## Reproducing
 
