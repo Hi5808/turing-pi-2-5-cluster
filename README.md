@@ -33,6 +33,7 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 - One node as the gateway for the whole board: [log](logs/2026-09-24_wifi-gateway-network.md)
 - A first storage figure for the RK1's NVMe: [log](logs/2026-09-24_node1-nvme-storage.md)
 - fio on the NVMe of all three nodes (same drive model, same link): host-dependent write speed and a read-throughput state effect on all three: [log](logs/2026-09-24_nvme-fio-all-nodes.md)
+- One model on three chips, and the RK3588 NPU against its own CPU (NPU decode is about half the speed of the four big cores; an earlier 18.9 tok/s figure was not reproduced): [log](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md)
 
 ## Method in one paragraph
 

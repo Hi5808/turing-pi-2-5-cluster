@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 16 | 28% |
-| 🟡 PARTIAL | 8 | 14% |
+| ✅ WORKS | 23 | 38% |
+| 🟡 PARTIAL | 7 | 12% |
 | ❌ FAILS | 2 | 3% |
 | 🔌 NEEDS-HW | 4 | 7% |
-| ⬜ UNTESTED | 28 | 48% |
-| **Total** | **58** | |
+| ⬜ UNTESTED | 24 | 40% |
+| **Total** | **60** | |
 
 ## A compute
 
@@ -23,11 +23,11 @@
 | A02 | GPU initialises on cold boot | orin-nano-8g | 3 | 🟡 PARTIAL | MEASURED | 1 failure in 18 automated cold boots (+1 earlier unlogged); 0 in 5 warm reboots | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
 | A03 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nx-16g | 2 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
 | A04 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nano-8g | 3 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
-| A05 | NPU kernel driver present | rk3588 | 1 | 🟡 PARTIAL | INVENTORY | /dev/dri/card1 = RKNPU; npu@fdab0000 okay; CONFIG_ROCKCHIP_RKNPU=y; no userland runtime installed |  |
-| A06 | LLM inference (CUDA) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
-| A07 | LLM inference (CUDA) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
-| A08 | LLM inference (NPU via RKLLM) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
-| A09 | LLM inference (CPU only) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A05 | NPU (RKLLM) works: runtime + driver v0.9.7 | rk3588 | 1 | ✅ WORKS | MEASURED | TinyLlama 1.1B W8A8: 11.2 tok/s decode, ~230 tok/s prefill | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A06 | LLM inference (CUDA) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 1748 t/s prefill, 43.8 t/s decode (llama.cpp CUDA) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A07 | LLM inference (CUDA) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 1559 t/s prefill, 39.4 t/s decode (llama.cpp CUDA) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A08 | LLM inference (NPU via RKLLM) | rk3588 | 1 | ✅ WORKS | MEASURED | 11.2 tok/s decode, 6 trials; sweep 10.5-11.6 tok/s over 300-1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A09 | LLM inference (CPU only) | rk3588 | 1 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 19.7 t/s decode on 4 big cores (15.5 on 8 threads); TinyLlama Q8_0: 22.2 t/s | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A10 | LLM inference (Mali-G610 via Vulkan/OpenCL) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
 | A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
@@ -37,6 +37,8 @@
 | A16 | Energy per token (power rails) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
 | A17 | Energy per token (power rails) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
 | A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A19 | NPU decode vs NPU clock (300-1000 MHz sweep) | rk3588 | 1 | ✅ WORKS | MEASURED | 10.45 t/s at 300 MHz; 11.3-11.6 t/s from 400 to 1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A20 | DRAM controller clock effect on NPU decode | rk3588 | 1 | ✅ WORKS | MEASURED | 1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 
 ## B cluster
 

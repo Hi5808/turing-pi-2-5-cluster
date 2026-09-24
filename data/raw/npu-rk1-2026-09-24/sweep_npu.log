@@ -1,0 +1,34 @@
+=== pinned 300000000 (cur 300000000) ===
+  trial 4/4 decode=10.41 tok/s n_tok=99 temp_after=55.461C
+  -> mean decode: 10.45 +/- 0.21 tok/s (4/4 valid)
+
+=== pinned 400000000 (cur 400000000) ===
+  trial 4/4 decode=11.34 tok/s n_tok=99 temp_after=57.307C
+  -> mean decode: 11.26 +/- 0.11 tok/s (4/4 valid)
+
+=== pinned 500000000 (cur 500000000) ===
+  trial 4/4 decode=11.23 tok/s n_tok=99 temp_after=58.23C
+  -> mean decode: 11.34 +/- 0.12 tok/s (4/4 valid)
+
+=== pinned 600000000 (cur 600000000) ===
+  trial 4/4 decode=11.23 tok/s n_tok=99 temp_after=58.23C
+  -> mean decode: 11.48 +/- 0.2 tok/s (4/4 valid)
+
+=== pinned 700000000 (cur 700000000) ===
+  trial 4/4 decode=11.67 tok/s n_tok=99 temp_after=58.23C
+  -> mean decode: 11.46 +/- 0.29 tok/s (4/4 valid)
+
+=== pinned 800000000 (cur 800000000) ===
+  trial 4/4 decode=11.44 tok/s n_tok=99 temp_after=59.153C
+  -> mean decode: 11.4 +/- 0.12 tok/s (4/4 valid)
+
+=== pinned 900000000 (cur 900000000) ===
+  trial 4/4 decode=11.57 tok/s n_tok=99 temp_after=59.153C
+  -> mean decode: 11.62 +/- 0.08 tok/s (4/4 valid)
+
+=== pinned 1000000000 (cur 1000000000) ===
+  trial 4/4 decode=11.56 tok/s n_tok=99 temp_after=59.153C
+  -> mean decode: 11.45 +/- 0.12 tok/s (4/4 valid)
+
+SWEEP_DONE
+restored: rknpu_ondemand 1000000000
