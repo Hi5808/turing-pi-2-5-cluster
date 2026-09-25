@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 33 | 52% |
-| 🟡 PARTIAL | 6 | 10% |
+| ✅ WORKS | 34 | 53% |
+| 🟡 PARTIAL | 6 | 9% |
 | ❌ FAILS | 5 | 8% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 15 | 24% |
-| **Total** | **63** | |
+| ⬜ UNTESTED | 15 | 23% |
+| **Total** | **64** | |
 
 ## A compute
 
@@ -61,6 +61,7 @@
 | C05 | Monitoring (Prometheus/Grafana) | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
 | C06 | ARM64 CI/build runner | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | C07 | Remote access as subnet router (Tailscale) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| C08 | NFS share of node-1 NVMe to the Jetsons | rk3588 | 1 | ✅ WORKS | MEASURED | 117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched | [2026-09-24_nfs-share-from-node1](logs/2026-09-24_nfs-share-from-node1.md) |
 
 ## D media/sensing
 
