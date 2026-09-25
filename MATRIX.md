@@ -8,11 +8,11 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 30 | 48% |
+| ✅ WORKS | 32 | 52% |
 | 🟡 PARTIAL | 6 | 10% |
 | ❌ FAILS | 5 | 8% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 17 | 27% |
+| ⬜ UNTESTED | 15 | 24% |
 | **Total** | **62** | |
 
 ## A compute
@@ -34,8 +34,8 @@
 | A13 | Vision inference (RKNN) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | A14 | DLA offload | orin-nx-16g | 2 | ❌ FAILS | MEASURED | TensorRT: Cannot create DLA engine, 0/1 not available (also as root) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A15 | DLA offload | orin-nano-8g | 3 | ❌ FAILS | MEASURED | TensorRT: DLA core 0 not available (expected) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
-| A16 | Energy per token (power rails) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
-| A17 | Energy per token (power rails) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
+| A16 | Energy per token (power rails) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 0.514 J/token total (22.4 W busy, 43.6 t/s), 0.372 net of idle; Qwen3-1.7B Q4_K_M | [2026-09-24_jetson-energy-per-token](logs/2026-09-24_jetson-energy-per-token.md) |
+| A17 | Energy per token (power rails) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 0.512 J/token total (20.2 W busy, 39.5 t/s), 0.331 net of idle; Qwen3-1.7B Q4_K_M | [2026-09-24_jetson-energy-per-token](logs/2026-09-24_jetson-energy-per-token.md) |
 | A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | A19 | NPU decode vs NPU clock (300-1000 MHz sweep) | rk3588 | 1 | ✅ WORKS | MEASURED | 10.45 t/s at 300 MHz; 11.3-11.6 t/s from 400 to 1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A20 | DRAM controller clock effect on NPU decode | rk3588 | 1 | ✅ WORKS | MEASURED | 1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |

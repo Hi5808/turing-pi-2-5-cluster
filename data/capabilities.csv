@@ -14,8 +14,8 @@ A12,A compute,Vision inference (TensorRT),orin-nano-8g,3,WORKS,MEASURED,ResNet18
 A13,A compute,Vision inference (RKNN),rk3588,1,UNTESTED,PLANNED,,,,
 A14,A compute,DLA offload,orin-nx-16g,2,FAILS,MEASURED,"TensorRT: Cannot create DLA engine, 0/1 not available (also as root)",2026-09-24,2026-09-24_tensorrt-dla-orin,"DT nodes okay, driver probed, firmware+libs present; cause open (possibly Nano-Super QSPI config from recovery)"
 A15,A compute,DLA offload,orin-nano-8g,3,FAILS,MEASURED,TensorRT: DLA core 0 not available (expected),2026-09-24,2026-09-24_tensorrt-dla-orin,Nano documented as having no DLA; consistent
-A16,A compute,Energy per token (power rails),orin-nx-16g,2,UNTESTED,PLANNED,,,,
-A17,A compute,Energy per token (power rails),orin-nano-8g,3,UNTESTED,PLANNED,,,,
+A16,A compute,Energy per token (power rails),orin-nx-16g,2,WORKS,MEASURED,"0.514 J/token total (22.4 W busy, 43.6 t/s), 0.372 net of idle; Qwen3-1.7B Q4_K_M",2026-09-24,2026-09-24_jetson-energy-per-token,"Module VDD_IN via tegrastats, 1 Hz"
+A17,A compute,Energy per token (power rails),orin-nano-8g,3,WORKS,MEASURED,"0.512 J/token total (20.2 W busy, 39.5 t/s), 0.331 net of idle; Qwen3-1.7B Q4_K_M",2026-09-24,2026-09-24_jetson-energy-per-token,"Module VDD_IN via tegrastats, 1 Hz"
 A18,A compute,Energy per token (external meter),rk3588,1,UNTESTED,PLANNED,,,,RK1 has no on-module rail telemetry; needs board-level meter
 B01,B cluster,Shared WiFi gateway (DHCP+DNS+NAT) hosted on one node,rk3588,1,WORKS,MEASURED,"nodes 2,3 + BMC route through node 1's WiFi; survives node-1 reboot and full-board cold start",2026-09-24,2026-09-24_wifi-gateway-network,
 B02,B cluster,Model endpoint routing across nodes,mixed,,UNTESTED,PLANNED,,,,
