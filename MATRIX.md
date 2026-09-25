@@ -9,10 +9,10 @@
 | Status | Rows | Share |
 |---|---:|---:|
 | ✅ WORKS | 40 | 59% |
-| 🟡 PARTIAL | 8 | 12% |
+| 🟡 PARTIAL | 9 | 13% |
 | ❌ FAILS | 5 | 7% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 11 | 16% |
+| ⬜ UNTESTED | 10 | 15% |
 | **Total** | **68** | |
 
 ## A compute
@@ -116,7 +116,7 @@
 | G01 | Full-board cold start integrity | any |  | ✅ WORKS | MEASURED | all filesystems clean; NVMe critical_warning 0, media_errors 0 | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
 | G02 | GPU self-heal service | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 1 real GPU failure recovered without intervention in ~165 s; forced test: 2 reboots then gives up | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
 | G03 | Fault injection (power loss mid-write) | any |  | ⬜ UNTESTED | PLANNED |  |  |
-| G04 | Hardware watchdog | any |  | ⬜ UNTESTED | PLANNED |  |  |
+| G04 | Hardware watchdog | any |  | 🟡 PARTIAL | INVENTORY | Jetsons: /dev/watchdog0 present, systemd RuntimeWatchdogUSec=2min; RK1: no /dev/watchdog* device |  |
 
 ## Slot coverage
 

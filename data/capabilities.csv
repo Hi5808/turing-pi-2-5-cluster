@@ -20,14 +20,14 @@ A18,A compute,Energy per token (external meter),rk3588,1,UNTESTED,PLANNED,,,,RK1
 B01,B cluster,Shared WiFi gateway (DHCP+DNS+NAT) hosted on one node,rk3588,1,WORKS,MEASURED,"nodes 2,3 + BMC route through node 1's WiFi; survives node-1 reboot and full-board cold start",2026-09-24,2026-09-24_wifi-gateway-network,
 B02,B cluster,Model endpoint routing across nodes,mixed,,UNTESTED,PLANNED,,,,
 B03,B cluster,Model split across nodes (llama.cpp RPC) over 1 GbE,mixed,,UNTESTED,PLANNED,,,,"Attempt to start an unauthenticated llama.cpp rpc-server on the NX was refused by the permission classifier; builds exist (node 1 client, NX server, commit 7044859). Awaiting user decision (e.g. loopback + SSH tunnel)"
-B04,B cluster,Kubernetes (k3s) with GPU and NPU device plugins,mixed,,UNTESTED,PLANNED,,,,
+B04,B cluster,Kubernetes (k3s) with GPU and NPU device plugins,mixed,,UNTESTED,PLANNED,,,,Not started: installs persistent services on the user's nodes / changes network exposure; awaiting user go-ahead
 C01,C infra,BMC remote control via tpi (power/USB/UART/flash),bmc,,WORKS,MEASURED,tpi 1.0.7 against BMC firmware 2.3.2,2026-09-23,2026-09-23_qspi-recovery-foreign-carrier,
 C02,C infra,BMC reboot restores node power state,bmc,,WORKS,MEASURED,BMC back in ~55 s; note: reboot cuts power to all nodes,2026-09-24,2026-09-24_full-board-reboot-integrity,
 C03,C infra,Local storage node (1 TB NVMe) with checksum-verified I/O,rk3588,1,WORKS,MEASURED,"fio 3 reps: seq write 1765 MB/s, rand write QD1 41k IOPS, rand read QD32 140k IOPS (supersedes dd 1.2/1.8 GB/s)",2026-09-24,2026-09-24_nvme-fio-all-nodes,dd figure single run; fio shows read state effect (see log)
 C04,C infra,NFS model store shared to the other nodes,rk3588,1,WORKS,MEASURED,"117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched",2026-09-24,2026-09-24_nfs-share-from-node1,"Export left enabled (no_root_squash, board subnet only)"
-C05,C infra,Monitoring (Prometheus/Grafana),mixed,,UNTESTED,PLANNED,,,,
-C06,C infra,ARM64 CI/build runner,rk3588,1,UNTESTED,PLANNED,,,,
-C07,C infra,Remote access as subnet router (Tailscale),rk3588,1,UNTESTED,PLANNED,,,,
+C05,C infra,Monitoring (Prometheus/Grafana),mixed,,UNTESTED,PLANNED,,,,Not started: installs persistent services on the user's nodes / changes network exposure; awaiting user go-ahead
+C06,C infra,ARM64 CI/build runner,rk3588,1,UNTESTED,PLANNED,,,,Not started: installs persistent services on the user's nodes / changes network exposure; awaiting user go-ahead
+C07,C infra,Remote access as subnet router (Tailscale),rk3588,1,UNTESTED,PLANNED,,,,Not started: installs persistent services on the user's nodes / changes network exposure; awaiting user go-ahead
 D01,D media/sensing,HDMI output,rk3588,1,WORKS,MEASURED,RK1 desktop captured over HDMI (factory image),2026-09-23,,Not yet re-tested under the Ubuntu image
 D02,D media/sensing,USB 2.0 host (Wi-Fi dongle RTL8822BU),rk3588,1,PARTIAL,MEASURED,"in-kernel rtw88: FAILS (register timeouts -110); vendor 88x2bu: WORKS (5 GHz, 867 Mbit/s link)",2026-09-24,2026-09-24_mini-pcie-wifi-investigation,Driver choice decides
 D03,D media/sensing,USB 3.0 host,any,4,NEEDS-HW,DOCUMENTED,,,,USB 3.0 ports belong to slot 4 (empty). Needs a module in slot 4
@@ -55,8 +55,8 @@ F06,F low-level,Custom kernel / DVFS / thermal soak,any,,PARTIAL,MEASURED,"5 min
 F07,F low-level,Secure boot / fuses,any,,UNTESTED,PLANNED,,,,Irreversible: only with explicit sign-off
 G01,G reliability,Full-board cold start integrity,any,,WORKS,MEASURED,"all filesystems clean; NVMe critical_warning 0, media_errors 0",2026-09-24,2026-09-24_full-board-reboot-integrity,
 G02,G reliability,GPU self-heal service,orin-nx-16g,2,WORKS,MEASURED,1 real GPU failure recovered without intervention in ~165 s; forced test: 2 reboots then gives up,2026-09-24,2026-09-24_gpu-init-cold-boot-failure,
-G03,G reliability,Fault injection (power loss mid-write),any,,UNTESTED,PLANNED,,,,
-G04,G reliability,Hardware watchdog,any,,UNTESTED,PLANNED,,,,/dev/watchdog0 present on Jetsons
+G03,G reliability,Fault injection (power loss mid-write),any,,UNTESTED,PLANNED,,,,Not run on purpose: power loss mid-write risks the NVMe OS/data the user needs intact; needs explicit sign-off
+G04,G reliability,Hardware watchdog,any,,PARTIAL,INVENTORY,"Jetsons: /dev/watchdog0 present, systemd RuntimeWatchdogUSec=2min; RK1: no /dev/watchdog* device",2026-09-24,,Reset-on-hang not triggered (would reboot user-facing nodes); RK1 exposes none on this image
 A19,A compute,NPU decode vs NPU clock (300-1000 MHz sweep),rk3588,1,WORKS,MEASURED,10.45 t/s at 300 MHz; 11.3-11.6 t/s from 400 to 1000 MHz,2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,Governors restored and verified
 A20,A compute,DRAM controller clock effect on NPU decode,rk3588,1,WORKS,MEASURED,1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise),2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,
 D09,D media/sensing,Hardware video encode,orin-nano-8g,3,FAILS,MEASURED,"no v4l2-nvenc device, no nvv4l2 encoder elements; x264 CPU ~18 fps 1080p",2026-09-24,2026-09-24_mali-opencl-and-video-encode,Matches documentation (no NVENC on Orin Nano)
