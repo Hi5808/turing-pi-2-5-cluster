@@ -64,3 +64,15 @@ One unit of each module; 3–6 repetitions; sd shown is between repetitions, not
 ## Reproduction
 
 `data/raw/npu-rk1-2026-09-24/` (harness JSON per condition, sweep log), `data/raw/llamabench-2026-09-24/README.md`. Harness: `bench.py` and the sweep from the Orange Pi 5 Plus harness with paths changed.
+
+## Addendum: repeat run (same day, about three hours later)
+
+The `tp bench llm` command (3 repetitions, same model file and binaries) reproduced the figures within 1% for decode and 1 to 1.5% for prefill:
+
+| Node | Prefill first run → repeat (t/s) | Decode first run → repeat (t/s) |
+|---|---|---|
+| Orin NX (CUDA) | 1748.5 → 1735.3 | 43.82 → 43.55 |
+| Orin Nano (CUDA) | 1559.4 → 1544.2 | 39.44 → 39.41 |
+| RK1 CPU, 4 big cores | 47.7 → 47.9 | 19.67 → 19.76 |
+
+One repeat on one day is not a stability study, but it shows the measurements are repeatable on this board when the same procedure is used.
