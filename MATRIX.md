@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 39 | 57% |
-| 🟡 PARTIAL | 7 | 10% |
+| ✅ WORKS | 40 | 59% |
+| 🟡 PARTIAL | 8 | 12% |
 | ❌ FAILS | 5 | 7% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 14 | 20% |
-| **Total** | **69** | |
+| ⬜ UNTESTED | 11 | 16% |
+| **Total** | **68** | |
 
 ## A compute
 
@@ -31,7 +31,7 @@
 | A10 | GPU compute (Mali-G610): OpenCL works, Vulkan fails | rk3588 | 1 | 🟡 PARTIAL | MEASURED | OpenCL 3.0: 435 GFLOPS FP32, 870 FP16, 19.5 GB/s; Vulkan: no usable ICD | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
 | A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | ResNet18 FP16 1170 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | ResNet18 FP16 1103 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
-| A13 | Vision inference (RKNN) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A13 | Vision inference (RKNN) | rk3588 | 1 | ✅ WORKS | MEASURED | YOLOv5s 640: 25.9 ms (38.6 fps) 1 core; 16.9 ms (59.1 fps) 3 cores | [2026-09-24_rknn-vision-and-io-survey](logs/2026-09-24_rknn-vision-and-io-survey.md) |
 | A14 | DLA offload | orin-nx-16g | 2 | ❌ FAILS | MEASURED | TensorRT: Cannot create DLA engine, 0/1 not available (also as root) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A15 | DLA offload | orin-nano-8g | 3 | ❌ FAILS | MEASURED | TensorRT: DLA core 0 not available (expected) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A16 | Energy per token (power rails) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 0.514 J/token total (22.4 W busy, 43.6 t/s), 0.372 net of idle; Qwen3-1.7B Q4_K_M | [2026-09-24_jetson-energy-per-token](logs/2026-09-24_jetson-energy-per-token.md) |
@@ -61,11 +61,10 @@
 | C01 | BMC remote control via tpi (power/USB/UART/flash) | bmc |  | ✅ WORKS | MEASURED | tpi 1.0.7 against BMC firmware 2.3.2 | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
 | C02 | BMC reboot restores node power state | bmc |  | ✅ WORKS | MEASURED | BMC back in ~55 s; note: reboot cuts power to all nodes | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
 | C03 | Local storage node (1 TB NVMe) with checksum-verified I/O | rk3588 | 1 | ✅ WORKS | MEASURED | fio 3 reps: seq write 1765 MB/s, rand write QD1 41k IOPS, rand read QD32 140k IOPS (supersedes dd 1.2/1.8 GB/s) | [2026-09-24_nvme-fio-all-nodes](logs/2026-09-24_nvme-fio-all-nodes.md) |
-| C04 | NFS model store shared to the other nodes | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| C04 | NFS model store shared to the other nodes | rk3588 | 1 | ✅ WORKS | MEASURED | 117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched | [2026-09-24_nfs-share-from-node1](logs/2026-09-24_nfs-share-from-node1.md) |
 | C05 | Monitoring (Prometheus/Grafana) | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
 | C06 | ARM64 CI/build runner | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | C07 | Remote access as subnet router (Tailscale) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
-| C08 | NFS share of node-1 NVMe to the Jetsons | rk3588 | 1 | ✅ WORKS | MEASURED | 117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched | [2026-09-24_nfs-share-from-node1](logs/2026-09-24_nfs-share-from-node1.md) |
 
 ## D media/sensing
 
@@ -76,7 +75,7 @@
 | D03 | USB 3.0 host | any | 4 | 🔌 NEEDS-HW | DOCUMENTED |  |  |
 | D04 | Camera (CSI/DSI) | any | 1 | 🔌 NEEDS-HW | DOCUMENTED |  |  |
 | D05 | CAN bus | orin-nx-16g | 2 | 🔌 NEEDS-HW | INVENTORY | can0 interface present |  |
-| D06 | GPIO / I2C / SPI header | any |  | ⬜ UNTESTED | UNKNOWN |  |  |
+| D06 | GPIO / I2C / SPI header | any |  | 🟡 PARTIAL | MEASURED | software interfaces enumerated on all nodes (GPIO/I2C/SPI/CAN/UART/PWM); physical 40-pin header not tested | [2026-09-24_rknn-vision-and-io-survey](logs/2026-09-24_rknn-vision-and-io-survey.md) |
 | D07 | Hardware video encode | orin-nx-16g | 2 | ✅ WORKS | MEASURED | NVENC H.264/H.265/AV1 1080p >=55 fps (source-bound) | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
 | D08 | Hardware video encode | rk3588 | 1 | ✅ WORKS | MEASURED | MPP H.264/H.265 1080p >=59.5 fps (source-bound) | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
 | D09 | Hardware video encode | orin-nano-8g | 3 | ❌ FAILS | MEASURED | no v4l2-nvenc device, no nvv4l2 encoder elements; x264 CPU ~18 fps 1080p | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |

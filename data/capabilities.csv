@@ -11,7 +11,7 @@ A09,A compute,LLM inference (CPU only),rk3588,1,WORKS,MEASURED,Qwen3-1.7B Q4_K_M
 A10,A compute,"GPU compute (Mali-G610): OpenCL works, Vulkan fails",rk3588,1,PARTIAL,MEASURED,"OpenCL 3.0: 435 GFLOPS FP32, 870 FP16, 19.5 GB/s; Vulkan: no usable ICD",2026-09-24,2026-09-24_mali-opencl-and-video-encode,No LLM run on OpenCL
 A11,A compute,Vision inference (TensorRT),orin-nx-16g,2,WORKS,MEASURED,ResNet18 FP16 1170 qps (batch 1),2026-09-24,2026-09-24_tensorrt-dla-orin,"One model, one run"
 A12,A compute,Vision inference (TensorRT),orin-nano-8g,3,WORKS,MEASURED,ResNet18 FP16 1103 qps (batch 1),2026-09-24,2026-09-24_tensorrt-dla-orin,"One model, one run"
-A13,A compute,Vision inference (RKNN),rk3588,1,UNTESTED,PLANNED,,,,
+A13,A compute,Vision inference (RKNN),rk3588,1,WORKS,MEASURED,YOLOv5s 640: 25.9 ms (38.6 fps) 1 core; 16.9 ms (59.1 fps) 3 cores,2026-09-24,2026-09-24_rknn-vision-and-io-survey,"Random input, no accuracy check"
 A14,A compute,DLA offload,orin-nx-16g,2,FAILS,MEASURED,"TensorRT: Cannot create DLA engine, 0/1 not available (also as root)",2026-09-24,2026-09-24_tensorrt-dla-orin,"DT nodes okay, driver probed, firmware+libs present; cause open (possibly Nano-Super QSPI config from recovery)"
 A15,A compute,DLA offload,orin-nano-8g,3,FAILS,MEASURED,TensorRT: DLA core 0 not available (expected),2026-09-24,2026-09-24_tensorrt-dla-orin,Nano documented as having no DLA; consistent
 A16,A compute,Energy per token (power rails),orin-nx-16g,2,WORKS,MEASURED,"0.514 J/token total (22.4 W busy, 43.6 t/s), 0.372 net of idle; Qwen3-1.7B Q4_K_M",2026-09-24,2026-09-24_jetson-energy-per-token,"Module VDD_IN via tegrastats, 1 Hz"
@@ -24,7 +24,7 @@ B04,B cluster,Kubernetes (k3s) with GPU and NPU device plugins,mixed,,UNTESTED,P
 C01,C infra,BMC remote control via tpi (power/USB/UART/flash),bmc,,WORKS,MEASURED,tpi 1.0.7 against BMC firmware 2.3.2,2026-09-23,2026-09-23_qspi-recovery-foreign-carrier,
 C02,C infra,BMC reboot restores node power state,bmc,,WORKS,MEASURED,BMC back in ~55 s; note: reboot cuts power to all nodes,2026-09-24,2026-09-24_full-board-reboot-integrity,
 C03,C infra,Local storage node (1 TB NVMe) with checksum-verified I/O,rk3588,1,WORKS,MEASURED,"fio 3 reps: seq write 1765 MB/s, rand write QD1 41k IOPS, rand read QD32 140k IOPS (supersedes dd 1.2/1.8 GB/s)",2026-09-24,2026-09-24_nvme-fio-all-nodes,dd figure single run; fio shows read state effect (see log)
-C04,C infra,NFS model store shared to the other nodes,rk3588,1,UNTESTED,PLANNED,,,,
+C04,C infra,NFS model store shared to the other nodes,rk3588,1,WORKS,MEASURED,"117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched",2026-09-24,2026-09-24_nfs-share-from-node1,"Export left enabled (no_root_squash, board subnet only)"
 C05,C infra,Monitoring (Prometheus/Grafana),mixed,,UNTESTED,PLANNED,,,,
 C06,C infra,ARM64 CI/build runner,rk3588,1,UNTESTED,PLANNED,,,,
 C07,C infra,Remote access as subnet router (Tailscale),rk3588,1,UNTESTED,PLANNED,,,,
@@ -33,7 +33,7 @@ D02,D media/sensing,USB 2.0 host (Wi-Fi dongle RTL8822BU),rk3588,1,PARTIAL,MEASU
 D03,D media/sensing,USB 3.0 host,any,4,NEEDS-HW,DOCUMENTED,,,,USB 3.0 ports belong to slot 4 (empty). Needs a module in slot 4
 D04,D media/sensing,Camera (CSI/DSI),any,1,NEEDS-HW,DOCUMENTED,,,,DSI documented on node 1; CSI availability unstated
 D05,D media/sensing,CAN bus,orin-nx-16g,2,NEEDS-HW,INVENTORY,can0 interface present,2026-09-24,,Needs transceiver; header availability on this board unknown
-D06,D media/sensing,GPIO / I2C / SPI header,any,,UNTESTED,UNKNOWN,,,,40-pin header's node is not stated in vendor docs; measure
+D06,D media/sensing,GPIO / I2C / SPI header,any,,PARTIAL,MEASURED,software interfaces enumerated on all nodes (GPIO/I2C/SPI/CAN/UART/PWM); physical 40-pin header not tested,2026-09-24,2026-09-24_rknn-vision-and-io-survey,Which node reaches the header is still unknown
 D07,D media/sensing,Hardware video encode,orin-nx-16g,2,WORKS,MEASURED,NVENC H.264/H.265/AV1 1080p >=55 fps (source-bound),2026-09-24,2026-09-24_mali-opencl-and-video-encode,Ceiling not measured
 D08,D media/sensing,Hardware video encode,rk3588,1,WORKS,MEASURED,MPP H.264/H.265 1080p >=59.5 fps (source-bound),2026-09-24,2026-09-24_mali-opencl-and-video-encode,Ceiling not measured; needs gstreamer1.0-rockchip1
 E01,E storage/PCIe,M.2 NVMe (PCIe Gen3 x4),rk3588,1,WORKS,MEASURED,fio: seq write 1765 MB/s; seq read 2432 first rep then ~715; rand read 4k QD1 14.1k IOPS; 3 reps,2026-09-24,2026-09-24_nvme-fio-all-nodes,Drive Gen3 x4 8 GT/s; RK1 fastest on writes; state effect on seq read
@@ -62,7 +62,6 @@ A20,A compute,DRAM controller clock effect on NPU decode,rk3588,1,WORKS,MEASURED
 D09,D media/sensing,Hardware video encode,orin-nano-8g,3,FAILS,MEASURED,"no v4l2-nvenc device, no nvv4l2 encoder elements; x264 CPU ~18 fps 1080p",2026-09-24,2026-09-24_mali-opencl-and-video-encode,Matches documentation (no NVENC on Orin Nano)
 D10,D media/sensing,CPU x264 1080p veryfast (cross-chip),rk3588,1,WORKS,MEASURED,"RK1 ~37 fps, NX ~20 fps, Nano ~18 fps",2026-09-24,2026-09-24_mali-opencl-and-video-encode,
 B05,B cluster,Inter-node TCP throughput and latency (1 GbE fabric),mixed,,WORKS,MEASURED,"941 Mbit/s on every pair, 0 retransmits; RTT 0.14 ms (2<->3), 0.26 ms via node 1",2026-09-24,2026-09-24_cluster-network-1gbe,Ceiling for any cross-node model split
-C08,C infra,NFS share of node-1 NVMe to the Jetsons,rk3588,1,WORKS,MEASURED,"117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched",2026-09-24,2026-09-24_nfs-share-from-node1,"Export left enabled (no_root_squash, board subnet only)"
 A21,A compute,"CPU throughput (sysbench, 1 thread / all threads)",rk3588,1,WORKS,MEASURED,938 / 5113 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,4x A76 + 4x A55
 A22,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nx-16g,2,WORKS,MEASURED,871 / 6931 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,8x A78AE
 A23,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nano-8g,3,WORKS,MEASURED,759 / 4472 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,6x A78AE

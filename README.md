@@ -42,6 +42,7 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 - CPU and memory throughput on the three chips: [log](logs/2026-09-24_cpu-and-memory-cross-chip.md)
 - What the BMC exposes (no node power telemetry): [log](logs/2026-09-24_bmc-inventory.md)
 - Five-minute all-core CPU soak on all three chips (no throttling): [log](logs/2026-09-24_cpu-thermal-soak.md)
+- RKNN vision on the RK1 NPU and a software survey of GPIO/I2C/SPI/CAN: [log](logs/2026-09-24_rknn-vision-and-io-survey.md)
 
 ## Method in one paragraph
 

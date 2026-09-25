@@ -1,0 +1,4 @@
+{"model":"yolov5s_relu_rk3588.rknn","input":"1x640x640x3 uint8 random","warmup":20,"runs":300,
+ "core0":{"mean_ms":25.91,"p50_ms":24.66,"p99_ms":35.64,"fps":38.6},
+ "core0_1_2":{"mean_ms":16.91,"p50_ms":16.19,"p99_ms":23.24,"fps":59.1},
+ "npu_freq_hz":1000000000,"note":"transcribed from terminal output"}
