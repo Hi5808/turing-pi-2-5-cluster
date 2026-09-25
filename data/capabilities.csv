@@ -51,7 +51,7 @@ F02,F low-level,Boot foreign-carrier modules on this board (QSPI-only reflash),o
 F03,F low-level,Restore original QSPI from backup,orin-nano-8g,3,WORKS,MEASURED,10 partitions restored and verified by read-back,2026-09-24,2026-09-23_qspi-recovery-foreign-carrier,Not repeated on the NX
 F04,F low-level,Device-tree overlay on RK1 (u-boot fdtoverlays),rk3588,1,WORKS,MEASURED,overlay applied and reverted cleanly,2026-09-24,2026-09-24_mini-pcie-wifi-investigation,
 F05,F low-level,NVMe unsafe-shutdown counter behaviour,orin-nx-16g,2,PARTIAL,MEASURED,+1 unsafe shutdown and +2 power cycles per cold boot; 0 per warm reboot; independent of shutdown wait (~15-20 s vs 90 s),2026-09-24,2026-09-24_full-board-reboot-integrity,"Mechanism hypothesised, not proven"
-F06,F low-level,Custom kernel / DVFS / thermal soak,any,,UNTESTED,PLANNED,,,,
+F06,F low-level,Custom kernel / DVFS / thermal soak,any,,PARTIAL,MEASURED,"5 min all-core CPU soak: no throttling (RK1 2256 MHz, 62 C; NX 1984 MHz, Tj 72 C; Nano 1728 MHz, Tj 66 C)",2026-09-24,2026-09-24_cpu-thermal-soak,CPU only; no combined GPU+NPU soak; custom kernel/DVFS not done
 F07,F low-level,Secure boot / fuses,any,,UNTESTED,PLANNED,,,,Irreversible: only with explicit sign-off
 G01,G reliability,Full-board cold start integrity,any,,WORKS,MEASURED,"all filesystems clean; NVMe critical_warning 0, media_errors 0",2026-09-24,2026-09-24_full-board-reboot-integrity,
 G02,G reliability,GPU self-heal service,orin-nx-16g,2,WORKS,MEASURED,1 real GPU failure recovered without intervention in ~165 s; forced test: 2 reboots then gives up,2026-09-24,2026-09-24_gpu-init-cold-boot-failure,
@@ -67,3 +67,4 @@ A21,A compute,"CPU throughput (sysbench, 1 thread / all threads)",rk3588,1,WORKS
 A22,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nx-16g,2,WORKS,MEASURED,871 / 6931 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,8x A78AE
 A23,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nano-8g,3,WORKS,MEASURED,759 / 4472 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,6x A78AE
 A24,A compute,"CPU memory read bandwidth, all threads (sysbench)",mixed,,WORKS,MEASURED,"NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s)",2026-09-24,2026-09-24_cpu-and-memory-cross-chip,RK1 GPU sees 19.5 GB/s in clpeak
+F08,F low-level,BMC controls and sensors (inventory),any,,WORKS,MEASURED,power/usb/uart/cooling controls work; no node power telemetry; fan 6/6,2026-09-24,2026-09-24_bmc-inventory,Read-only survey of fw 2.3.2

@@ -40,6 +40,8 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 - Inter-node network: 941 Mbit/s on every pair, 0.14 ms Jetson-to-Jetson: [log](logs/2026-09-24_cluster-network-1gbe.md)
 - NFS share of the RK1 NVMe: wire-limited, checksum-clean: [log](logs/2026-09-24_nfs-share-from-node1.md)
 - CPU and memory throughput on the three chips: [log](logs/2026-09-24_cpu-and-memory-cross-chip.md)
+- What the BMC exposes (no node power telemetry): [log](logs/2026-09-24_bmc-inventory.md)
+- Five-minute all-core CPU soak on all three chips (no throttling): [log](logs/2026-09-24_cpu-thermal-soak.md)
 
 ## Method in one paragraph
 

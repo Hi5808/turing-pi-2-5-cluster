@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 38 | 56% |
-| 🟡 PARTIAL | 6 | 9% |
+| ✅ WORKS | 39 | 57% |
+| 🟡 PARTIAL | 7 | 10% |
 | ❌ FAILS | 5 | 7% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 15 | 22% |
-| **Total** | **68** | |
+| ⬜ UNTESTED | 14 | 20% |
+| **Total** | **69** | |
 
 ## A compute
 
@@ -106,8 +106,9 @@
 | F03 | Restore original QSPI from backup | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 10 partitions restored and verified by read-back | [2026-09-23_qspi-recovery-foreign-carrier](logs/2026-09-23_qspi-recovery-foreign-carrier.md) |
 | F04 | Device-tree overlay on RK1 (u-boot fdtoverlays) | rk3588 | 1 | ✅ WORKS | MEASURED | overlay applied and reverted cleanly | [2026-09-24_mini-pcie-wifi-investigation](logs/2026-09-24_mini-pcie-wifi-investigation.md) |
 | F05 | NVMe unsafe-shutdown counter behaviour | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | +1 unsafe shutdown and +2 power cycles per cold boot; 0 per warm reboot; independent of shutdown wait (~15-20 s vs 90 s) | [2026-09-24_full-board-reboot-integrity](logs/2026-09-24_full-board-reboot-integrity.md) |
-| F06 | Custom kernel / DVFS / thermal soak | any |  | ⬜ UNTESTED | PLANNED |  |  |
+| F06 | Custom kernel / DVFS / thermal soak | any |  | 🟡 PARTIAL | MEASURED | 5 min all-core CPU soak: no throttling (RK1 2256 MHz, 62 C; NX 1984 MHz, Tj 72 C; Nano 1728 MHz, Tj 66 C) | [2026-09-24_cpu-thermal-soak](logs/2026-09-24_cpu-thermal-soak.md) |
 | F07 | Secure boot / fuses | any |  | ⬜ UNTESTED | PLANNED |  |  |
+| F08 | BMC controls and sensors (inventory) | any |  | ✅ WORKS | MEASURED | power/usb/uart/cooling controls work; no node power telemetry; fan 6/6 | [2026-09-24_bmc-inventory](logs/2026-09-24_bmc-inventory.md) |
 
 ## G reliability
 
