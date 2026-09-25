@@ -1,19 +1,19 @@
 id,track,feature,chip,slot,status,evidence,measurement,date,log,notes
 A01,A compute,GPU initialises on cold boot,orin-nx-16g,2,PARTIAL,MEASURED,2 failures in 18 automated cold boots; 0 in 5 warm reboots,2026-09-24,2026-09-24_gpu-init-cold-boot-failure,Self-heal (auto-reboot) recovered a real failure in ~165 s
 A02,A compute,GPU initialises on cold boot,orin-nano-8g,3,PARTIAL,MEASURED,1 failure in 18 automated cold boots (+1 earlier unlogged); 0 in 5 warm reboots,2026-09-24,2026-09-24_gpu-init-cold-boot-failure,nvpmodel service additionally lost a race on 3 of the first 5 cold boots
-A03,A compute,CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2),orin-nx-16g,2,PARTIAL,INVENTORY,packages present; functional tests not yet run,2026-09-24,,Inventory only
-A04,A compute,CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2),orin-nano-8g,3,PARTIAL,INVENTORY,packages present; functional tests not yet run,2026-09-24,,Inventory only
+A03,A compute,CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2),orin-nx-16g,2,WORKS,MEASURED,"trtexec ResNet18 FP16 1170 qps, INT8 (uncalibrated) 1527 qps",2026-09-24,2026-09-24_tensorrt-dla-orin,CUDA/TensorRT functional; VPI not yet tested
+A04,A compute,CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2),orin-nano-8g,3,WORKS,MEASURED,"trtexec ResNet18 FP16 1103 qps, INT8 (uncalibrated) 1714 qps",2026-09-24,2026-09-24_tensorrt-dla-orin,Nano faster than NX in INT8 in one run; unexplained
 A05,A compute,NPU (RKLLM) works: runtime + driver v0.9.7,rk3588,1,WORKS,MEASURED,"TinyLlama 1.1B W8A8: 11.2 tok/s decode, ~230 tok/s prefill",2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,Decode flat 400-1000 MHz; CPU (4 big cores) decodes 2x faster; prior Plus figure 18.9 not reproduced
 A06,A compute,LLM inference (CUDA),orin-nx-16g,2,WORKS,MEASURED,"Qwen3-1.7B Q4_K_M: 1748 t/s prefill, 43.8 t/s decode (llama.cpp CUDA)",2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,Build control: 43.5 t/s with the other build
 A07,A compute,LLM inference (CUDA),orin-nano-8g,3,WORKS,MEASURED,"Qwen3-1.7B Q4_K_M: 1559 t/s prefill, 39.4 t/s decode (llama.cpp CUDA)",2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,Ran beside the triage service with ~2.7 GB available
 A08,A compute,LLM inference (NPU via RKLLM),rk3588,1,WORKS,MEASURED,"11.2 tok/s decode, 6 trials; sweep 10.5-11.6 tok/s over 300-1000 MHz",2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,See log for the unreproduced 18.9 tok/s Plus figure
 A09,A compute,LLM inference (CPU only),rk3588,1,WORKS,MEASURED,Qwen3-1.7B Q4_K_M: 19.7 t/s decode on 4 big cores (15.5 on 8 threads); TinyLlama Q8_0: 22.2 t/s,2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,A55 cores slow decode
 A10,A compute,LLM inference (Mali-G610 via Vulkan/OpenCL),rk3588,1,UNTESTED,PLANNED,,,,libmali-g610 installed
-A11,A compute,Vision inference (TensorRT),orin-nx-16g,2,UNTESTED,PLANNED,,,,
-A12,A compute,Vision inference (TensorRT),orin-nano-8g,3,UNTESTED,PLANNED,,,,
+A11,A compute,Vision inference (TensorRT),orin-nx-16g,2,WORKS,MEASURED,ResNet18 FP16 1170 qps (batch 1),2026-09-24,2026-09-24_tensorrt-dla-orin,"One model, one run"
+A12,A compute,Vision inference (TensorRT),orin-nano-8g,3,WORKS,MEASURED,ResNet18 FP16 1103 qps (batch 1),2026-09-24,2026-09-24_tensorrt-dla-orin,"One model, one run"
 A13,A compute,Vision inference (RKNN),rk3588,1,UNTESTED,PLANNED,,,,
-A14,A compute,DLA offload,orin-nx-16g,2,UNTESTED,PLANNED,,,,Orin NX documented to have DLA cores; no /dev/nvhost-nvdla* seen; verify through TensorRT
-A15,A compute,DLA offload,orin-nano-8g,3,UNTESTED,DOCUMENTED,,,,Orin Nano documented to have no DLA; confirm
+A14,A compute,DLA offload,orin-nx-16g,2,FAILS,MEASURED,"TensorRT: Cannot create DLA engine, 0/1 not available (also as root)",2026-09-24,2026-09-24_tensorrt-dla-orin,"DT nodes okay, driver probed, firmware+libs present; cause open (possibly Nano-Super QSPI config from recovery)"
+A15,A compute,DLA offload,orin-nano-8g,3,FAILS,MEASURED,TensorRT: DLA core 0 not available (expected),2026-09-24,2026-09-24_tensorrt-dla-orin,Nano documented as having no DLA; consistent
 A16,A compute,Energy per token (power rails),orin-nx-16g,2,UNTESTED,PLANNED,,,,
 A17,A compute,Energy per token (power rails),orin-nano-8g,3,UNTESTED,PLANNED,,,,
 A18,A compute,Energy per token (external meter),rk3588,1,UNTESTED,PLANNED,,,,RK1 has no on-module rail telemetry; needs board-level meter

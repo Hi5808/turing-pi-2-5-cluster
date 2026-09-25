@@ -8,11 +8,11 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 23 | 38% |
-| 🟡 PARTIAL | 7 | 12% |
-| ❌ FAILS | 2 | 3% |
+| ✅ WORKS | 27 | 45% |
+| 🟡 PARTIAL | 5 | 8% |
+| ❌ FAILS | 4 | 7% |
 | 🔌 NEEDS-HW | 4 | 7% |
-| ⬜ UNTESTED | 24 | 40% |
+| ⬜ UNTESTED | 20 | 33% |
 | **Total** | **60** | |
 
 ## A compute
@@ -21,19 +21,19 @@
 |---|---|---|:-:|---|---|---|---|
 | A01 | GPU initialises on cold boot | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | 2 failures in 18 automated cold boots; 0 in 5 warm reboots | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
 | A02 | GPU initialises on cold boot | orin-nano-8g | 3 | 🟡 PARTIAL | MEASURED | 1 failure in 18 automated cold boots (+1 earlier unlogged); 0 in 5 warm reboots | [2026-09-24_gpu-init-cold-boot-failure](logs/2026-09-24_gpu-init-cold-boot-failure.md) |
-| A03 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nx-16g | 2 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
-| A04 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nano-8g | 3 | 🟡 PARTIAL | INVENTORY | packages present; functional tests not yet run |  |
+| A03 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | trtexec ResNet18 FP16 1170 qps, INT8 (uncalibrated) 1527 qps | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
+| A04 | CUDA 13.2 / TensorRT 10.16 / VPI 4.1 installed (JetPack 7.2) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | trtexec ResNet18 FP16 1103 qps, INT8 (uncalibrated) 1714 qps | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A05 | NPU (RKLLM) works: runtime + driver v0.9.7 | rk3588 | 1 | ✅ WORKS | MEASURED | TinyLlama 1.1B W8A8: 11.2 tok/s decode, ~230 tok/s prefill | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A06 | LLM inference (CUDA) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 1748 t/s prefill, 43.8 t/s decode (llama.cpp CUDA) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A07 | LLM inference (CUDA) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 1559 t/s prefill, 39.4 t/s decode (llama.cpp CUDA) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A08 | LLM inference (NPU via RKLLM) | rk3588 | 1 | ✅ WORKS | MEASURED | 11.2 tok/s decode, 6 trials; sweep 10.5-11.6 tok/s over 300-1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A09 | LLM inference (CPU only) | rk3588 | 1 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 19.7 t/s decode on 4 big cores (15.5 on 8 threads); TinyLlama Q8_0: 22.2 t/s | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A10 | LLM inference (Mali-G610 via Vulkan/OpenCL) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
-| A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
-| A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
+| A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | ResNet18 FP16 1170 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
+| A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | ResNet18 FP16 1103 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A13 | Vision inference (RKNN) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
-| A14 | DLA offload | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
-| A15 | DLA offload | orin-nano-8g | 3 | ⬜ UNTESTED | DOCUMENTED |  |  |
+| A14 | DLA offload | orin-nx-16g | 2 | ❌ FAILS | MEASURED | TensorRT: Cannot create DLA engine, 0/1 not available (also as root) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
+| A15 | DLA offload | orin-nano-8g | 3 | ❌ FAILS | MEASURED | TensorRT: DLA core 0 not available (expected) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A16 | Energy per token (power rails) | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
 | A17 | Energy per token (power rails) | orin-nano-8g | 3 | ⬜ UNTESTED | PLANNED |  |  |
 | A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
