@@ -1,0 +1,23 @@
+<stdin>:3: SyntaxWarning: invalid escape sequence '\('
+<stdin>:4: SyntaxWarning: invalid escape sequence '\('
+<stdin>:5: SyntaxWarning: invalid escape sequence '\('
+NX nvenc_h264 [56.8, 53.4, 53.3] rc 0
+NX nvenc_h265 [53.5, 54.9, 54.9] rc 0
+NX nvenc_av1 [55.3, 56.2, 56.7] rc 0
+NX x264_cpu [20.1, 20.2, 20.2] rc 0
+Nano x264_cpu [17.9, 17.8, 17.8] rc 0
+/dev/mpp_service
+/dev/rga
+
+/dev/dma_heap:
+cma
+  Candidate: 7:6.1.1-3ubuntu5+git20240717.8164ff7d~noble
+gstreamer1.0-rockchip1 - The Gstreamer plugins for Rockchip platforms.
+librga-dev - Userspace interface to Rockchip RGA 2D accelerator
+librga2 - Userspace interface to Rockchip RGA 2D accelerator
+librockchip-mpp-dev - Media Process Platform
+librockchip-mpp1 - Media Process Platform
+libv4l-rkmpp - A rockchip-mpp V4L2 wrapper plugin for chromium V4L2 VDA
+rockchip-mpp-demos - Media Process Platform Demos
+
+[exited with code 0]

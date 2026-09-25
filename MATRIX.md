@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 27 | 45% |
-| 🟡 PARTIAL | 5 | 8% |
-| ❌ FAILS | 4 | 7% |
-| 🔌 NEEDS-HW | 4 | 7% |
-| ⬜ UNTESTED | 20 | 33% |
-| **Total** | **60** | |
+| ✅ WORKS | 30 | 48% |
+| 🟡 PARTIAL | 6 | 10% |
+| ❌ FAILS | 5 | 8% |
+| 🔌 NEEDS-HW | 4 | 6% |
+| ⬜ UNTESTED | 17 | 27% |
+| **Total** | **62** | |
 
 ## A compute
 
@@ -28,7 +28,7 @@
 | A07 | LLM inference (CUDA) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 1559 t/s prefill, 39.4 t/s decode (llama.cpp CUDA) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A08 | LLM inference (NPU via RKLLM) | rk3588 | 1 | ✅ WORKS | MEASURED | 11.2 tok/s decode, 6 trials; sweep 10.5-11.6 tok/s over 300-1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A09 | LLM inference (CPU only) | rk3588 | 1 | ✅ WORKS | MEASURED | Qwen3-1.7B Q4_K_M: 19.7 t/s decode on 4 big cores (15.5 on 8 threads); TinyLlama Q8_0: 22.2 t/s | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
-| A10 | LLM inference (Mali-G610 via Vulkan/OpenCL) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A10 | GPU compute (Mali-G610): OpenCL works, Vulkan fails | rk3588 | 1 | 🟡 PARTIAL | MEASURED | OpenCL 3.0: 435 GFLOPS FP32, 870 FP16, 19.5 GB/s; Vulkan: no usable ICD | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
 | A11 | Vision inference (TensorRT) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | ResNet18 FP16 1170 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A12 | Vision inference (TensorRT) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | ResNet18 FP16 1103 qps (batch 1) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A13 | Vision inference (RKNN) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
@@ -71,8 +71,10 @@
 | D04 | Camera (CSI/DSI) | any | 1 | 🔌 NEEDS-HW | DOCUMENTED |  |  |
 | D05 | CAN bus | orin-nx-16g | 2 | 🔌 NEEDS-HW | INVENTORY | can0 interface present |  |
 | D06 | GPIO / I2C / SPI header | any |  | ⬜ UNTESTED | UNKNOWN |  |  |
-| D07 | Hardware video encode | orin-nx-16g | 2 | ⬜ UNTESTED | PLANNED |  |  |
-| D08 | Hardware video encode | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| D07 | Hardware video encode | orin-nx-16g | 2 | ✅ WORKS | MEASURED | NVENC H.264/H.265/AV1 1080p >=55 fps (source-bound) | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
+| D08 | Hardware video encode | rk3588 | 1 | ✅ WORKS | MEASURED | MPP H.264/H.265 1080p >=59.5 fps (source-bound) | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
+| D09 | Hardware video encode | orin-nano-8g | 3 | ❌ FAILS | MEASURED | no v4l2-nvenc device, no nvv4l2 encoder elements; x264 CPU ~18 fps 1080p | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
+| D10 | CPU x264 1080p veryfast (cross-chip) | rk3588 | 1 | ✅ WORKS | MEASURED | RK1 ~37 fps, NX ~20 fps, Nano ~18 fps | [2026-09-24_mali-opencl-and-video-encode](logs/2026-09-24_mali-opencl-and-video-encode.md) |
 
 ## E storage/PCIe
 
