@@ -1,0 +1,12 @@
+2->10.43.0.13
+50 packets transmitted, 50 received, 0% packet loss, time 9996ms
+rtt min/avg/max/mdev = 0.111/0.140/0.253/0.025 ms
+2->10.43.0.1
+50 packets transmitted, 50 received, 0% packet loss, time 9993ms
+rtt min/avg/max/mdev = 0.247/0.261/0.395/0.021 ms
+1->10.43.0.12
+50 packets transmitted, 50 received, 0% packet loss, time 10125ms
+rtt min/avg/max/mdev = 0.238/0.260/0.414/0.025 ms
+1->10.43.0.13
+50 packets transmitted, 50 received, 0% packet loss, time 10126ms
+rtt min/avg/max/mdev = 0.202/0.255/0.400/0.034 ms

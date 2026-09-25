@@ -37,6 +37,7 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 - TensorRT on both Orins; the NX's DLA cores exist in the device tree but TensorRT cannot use them: [log](logs/2026-09-24_tensorrt-dla-orin.md)
 - RK1 Mali GPU (OpenCL works, Vulkan does not) and hardware video encode on all three chips: [log](logs/2026-09-24_mali-opencl-and-video-encode.md)
 - Energy per token on both Orins (about 0.51 J each on the same model): [log](logs/2026-09-24_jetson-energy-per-token.md)
+- Inter-node network: 941 Mbit/s on every pair, 0.14 ms Jetson-to-Jetson: [log](logs/2026-09-24_cluster-network-1gbe.md)
 
 ## Method in one paragraph
 

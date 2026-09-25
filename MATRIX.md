@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 32 | 52% |
+| ✅ WORKS | 33 | 52% |
 | 🟡 PARTIAL | 6 | 10% |
 | ❌ FAILS | 5 | 8% |
 | 🔌 NEEDS-HW | 4 | 6% |
 | ⬜ UNTESTED | 15 | 24% |
-| **Total** | **62** | |
+| **Total** | **63** | |
 
 ## A compute
 
@@ -48,6 +48,7 @@
 | B02 | Model endpoint routing across nodes | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
 | B03 | Model split across nodes (llama.cpp RPC) over 1 GbE | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
 | B04 | Kubernetes (k3s) with GPU and NPU device plugins | mixed |  | ⬜ UNTESTED | PLANNED |  |  |
+| B05 | Inter-node TCP throughput and latency (1 GbE fabric) | mixed |  | ✅ WORKS | MEASURED | 941 Mbit/s on every pair, 0 retransmits; RTT 0.14 ms (2<->3), 0.26 ms via node 1 | [2026-09-24_cluster-network-1gbe](logs/2026-09-24_cluster-network-1gbe.md) |
 
 ## C infra
 

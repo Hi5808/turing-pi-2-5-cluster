@@ -61,3 +61,4 @@ A19,A compute,NPU decode vs NPU clock (300-1000 MHz sweep),rk3588,1,WORKS,MEASUR
 A20,A compute,DRAM controller clock effect on NPU decode,rk3588,1,WORKS,MEASURED,1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise),2026-09-24,2026-09-24_llm-decode-cross-chip-and-rk1-npu,
 D09,D media/sensing,Hardware video encode,orin-nano-8g,3,FAILS,MEASURED,"no v4l2-nvenc device, no nvv4l2 encoder elements; x264 CPU ~18 fps 1080p",2026-09-24,2026-09-24_mali-opencl-and-video-encode,Matches documentation (no NVENC on Orin Nano)
 D10,D media/sensing,CPU x264 1080p veryfast (cross-chip),rk3588,1,WORKS,MEASURED,"RK1 ~37 fps, NX ~20 fps, Nano ~18 fps",2026-09-24,2026-09-24_mali-opencl-and-video-encode,
+B05,B cluster,Inter-node TCP throughput and latency (1 GbE fabric),mixed,,WORKS,MEASURED,"941 Mbit/s on every pair, 0 retransmits; RTT 0.14 ms (2<->3), 0.26 ms via node 1",2026-09-24,2026-09-24_cluster-network-1gbe,Ceiling for any cross-node model split
