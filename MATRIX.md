@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 34 | 53% |
+| ✅ WORKS | 38 | 56% |
 | 🟡 PARTIAL | 6 | 9% |
-| ❌ FAILS | 5 | 8% |
+| ❌ FAILS | 5 | 7% |
 | 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 15 | 23% |
-| **Total** | **64** | |
+| ⬜ UNTESTED | 15 | 22% |
+| **Total** | **68** | |
 
 ## A compute
 
@@ -39,6 +39,10 @@
 | A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
 | A19 | NPU decode vs NPU clock (300-1000 MHz sweep) | rk3588 | 1 | ✅ WORKS | MEASURED | 10.45 t/s at 300 MHz; 11.3-11.6 t/s from 400 to 1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A20 | DRAM controller clock effect on NPU decode | rk3588 | 1 | ✅ WORKS | MEASURED | 1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
+| A21 | CPU throughput (sysbench, 1 thread / all threads) | rk3588 | 1 | ✅ WORKS | MEASURED | 938 / 5113 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
+| A22 | CPU throughput (sysbench, 1 thread / all threads) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 871 / 6931 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
+| A23 | CPU throughput (sysbench, 1 thread / all threads) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 759 / 4472 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
+| A24 | CPU memory read bandwidth, all threads (sysbench) | mixed |  | ✅ WORKS | MEASURED | NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s) | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 
 ## B cluster
 

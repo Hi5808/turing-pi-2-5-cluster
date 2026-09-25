@@ -19,7 +19,7 @@ A17,A compute,Energy per token (power rails),orin-nano-8g,3,WORKS,MEASURED,"0.51
 A18,A compute,Energy per token (external meter),rk3588,1,UNTESTED,PLANNED,,,,RK1 has no on-module rail telemetry; needs board-level meter
 B01,B cluster,Shared WiFi gateway (DHCP+DNS+NAT) hosted on one node,rk3588,1,WORKS,MEASURED,"nodes 2,3 + BMC route through node 1's WiFi; survives node-1 reboot and full-board cold start",2026-09-24,2026-09-24_wifi-gateway-network,
 B02,B cluster,Model endpoint routing across nodes,mixed,,UNTESTED,PLANNED,,,,
-B03,B cluster,Model split across nodes (llama.cpp RPC) over 1 GbE,mixed,,UNTESTED,PLANNED,,,,Measure exactly where 1 GbE limits tokens/s
+B03,B cluster,Model split across nodes (llama.cpp RPC) over 1 GbE,mixed,,UNTESTED,PLANNED,,,,"Attempt to start an unauthenticated llama.cpp rpc-server on the NX was refused by the permission classifier; builds exist (node 1 client, NX server, commit 7044859). Awaiting user decision (e.g. loopback + SSH tunnel)"
 B04,B cluster,Kubernetes (k3s) with GPU and NPU device plugins,mixed,,UNTESTED,PLANNED,,,,
 C01,C infra,BMC remote control via tpi (power/USB/UART/flash),bmc,,WORKS,MEASURED,tpi 1.0.7 against BMC firmware 2.3.2,2026-09-23,2026-09-23_qspi-recovery-foreign-carrier,
 C02,C infra,BMC reboot restores node power state,bmc,,WORKS,MEASURED,BMC back in ~55 s; note: reboot cuts power to all nodes,2026-09-24,2026-09-24_full-board-reboot-integrity,
@@ -63,3 +63,7 @@ D09,D media/sensing,Hardware video encode,orin-nano-8g,3,FAILS,MEASURED,"no v4l2
 D10,D media/sensing,CPU x264 1080p veryfast (cross-chip),rk3588,1,WORKS,MEASURED,"RK1 ~37 fps, NX ~20 fps, Nano ~18 fps",2026-09-24,2026-09-24_mali-opencl-and-video-encode,
 B05,B cluster,Inter-node TCP throughput and latency (1 GbE fabric),mixed,,WORKS,MEASURED,"941 Mbit/s on every pair, 0 retransmits; RTT 0.14 ms (2<->3), 0.26 ms via node 1",2026-09-24,2026-09-24_cluster-network-1gbe,Ceiling for any cross-node model split
 C08,C infra,NFS share of node-1 NVMe to the Jetsons,rk3588,1,WORKS,MEASURED,"117 MB/s write, 110 MB/s read (wire-limited); 1 GiB checksum matched",2026-09-24,2026-09-24_nfs-share-from-node1,"Export left enabled (no_root_squash, board subnet only)"
+A21,A compute,"CPU throughput (sysbench, 1 thread / all threads)",rk3588,1,WORKS,MEASURED,938 / 5113 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,4x A76 + 4x A55
+A22,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nx-16g,2,WORKS,MEASURED,871 / 6931 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,8x A78AE
+A23,A compute,"CPU throughput (sysbench, 1 thread / all threads)",orin-nano-8g,3,WORKS,MEASURED,759 / 4472 events/s,2026-09-24,2026-09-24_cpu-and-memory-cross-chip,6x A78AE
+A24,A compute,"CPU memory read bandwidth, all threads (sysbench)",mixed,,WORKS,MEASURED,"NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s)",2026-09-24,2026-09-24_cpu-and-memory-cross-chip,RK1 GPU sees 19.5 GB/s in clpeak

@@ -1,0 +1,12 @@
+=== nano
+cores=6
+cpu threads=1 run1:     events per second:   759.27
+cpu threads=1 run2:     events per second:   758.58
+cpu threads=1 run3:     events per second:   759.26
+cpu threads=6 run1:     events per second:  4469.71
+cpu threads=6 run2:     events per second:  4471.08
+cpu threads=6 run3:     events per second:  4472.09
+mem threads=1 read 1M: 30720.00 MiB transferred (23153.48 MiB/sec)
+mem threads=1 write 1M: 30720.00 MiB transferred (13915.75 MiB/sec)
+mem threads=6 read 1M: 30720.00 MiB transferred (70220.76 MiB/sec)
+mem threads=6 write 1M: 30720.00 MiB transferred (46612.26 MiB/sec)

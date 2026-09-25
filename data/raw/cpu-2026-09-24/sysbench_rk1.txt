@@ -1,0 +1,12 @@
+=== rk1
+cores=8
+cpu threads=1 run1:     events per second:   937.79
+cpu threads=1 run2:     events per second:   936.90
+cpu threads=1 run3:     events per second:   942.45
+cpu threads=8 run1:     events per second:  5111.66
+cpu threads=8 run2:     events per second:  5112.29
+cpu threads=8 run3:     events per second:  5113.83
+mem threads=1 read 1M: 30720.00 MiB transferred (23835.85 MiB/sec)
+mem threads=1 write 1M: 30720.00 MiB transferred (11093.78 MiB/sec)
+mem threads=8 read 1M: 30720.00 MiB transferred (56695.26 MiB/sec)
+mem threads=8 write 1M: 30720.00 MiB transferred (54683.42 MiB/sec)
