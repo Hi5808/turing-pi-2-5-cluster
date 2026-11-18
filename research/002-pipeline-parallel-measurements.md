@@ -151,7 +151,7 @@ Both targets exceed what either node can allocate individually, at constant Q3_K
 | | Dense Qwen3-32B | MoE Qwen3-30B-A3B |
 |---|---|---|
 | File size | 14.87 GiB (32.76B params) | 13.70 GiB (30.53B params, ~3B active) |
-| node2 alone (12.21 GiB) | **OOM, NvMap error 12** | exceeds by 1.5 GiB |
+| node2 alone | **OOM, NvMap error 12** | **loads and runs at 18.63 t/s** (see correction, §9) |
 | node3 alone (5.39 GiB) | **OOM, NvMap error 12** | exceeds by 8.3 GiB |
 | **node2+node3, pp128** | **82.22 t/s** | **129.21 t/s** |
 | **node2+node3, tg64** | **2.44 t/s** | **14.20 t/s** |
@@ -175,7 +175,7 @@ MoE:
 
 **Primary result:** a 32.76B-parameter dense model runs at 2.44 t/s on a chassis where it cannot be
 loaded on any single node, beating node1's CPU inference (~2 t/s) on a model 2.3× smaller. The
-combined-memory thesis holds.
+combined-memory thesis holds — **for the dense model only**; see the correction in §9.
 
 ### Swap validity check
 
@@ -220,3 +220,87 @@ aggregate numbers can leave one device unable to satisfy an allocation. **Practi
 prefer the automatic allocator.** This inverts the plan's intent to hand-tune the split from
 measured capacity — the measurement was useful for understanding the constraint, and actively
 harmful as a configuration.
+
+
+## 8. Batched decoding: the real throughput lever
+
+Every measurement above says the pipeline is compute-bound with idle headroom everywhere else —
+link at 4–8%, orchestrator CPU at 7.4%, and the logit return costing the same per *token* no matter
+how many sequences produced it. Single-stream decode leaves the GPUs idle between round-trips.
+
+`llama-batched-bench`, MoE, `-npp 128 -ntg 32`, KV q8_0, clocks locked:
+
+| Streams (B) | N_KV | Prompt t/s | Decode t/s | Total t/s |
+|---|---|---|---|---|
+| 1 | 160 | 100.82 | 12.64 | 42.10 |
+| 2 | 320 | 163.29 | 19.91 (1.58×) | 66.92 |
+| 4 | 640 | 238.30 | 23.58 (1.87×) | 84.46 |
+| 8 | 1280 | 254.36 | **35.30 (2.79×)** | **113.50** |
+
+**2.79× aggregate decode throughput at 8 streams, 2.5× on prompt processing.** Each weight read from
+memory serves all streams at once, so per-stream latency barely moves while aggregate throughput
+climbs. This is how the idle headroom gets spent, and it is the answer to "more tokens" on this
+hardware — not single-stream tuning.
+
+### KV quantisation is only justified in combination
+
+`-ctk q8_0 -ctv q8_0` *lost* 2.9% single-stream (§8a below), but 8 streams require 8× the KV cache
+(N_KV reached 1280). The quantisation is what buys the stream count. Testing it one-factor-at-a-time
+marked it useless; in combination it is an enabler. A caution against trusting isolated A/B results.
+
+## 8a. Single-stream optimisation sweep
+
+| Lever | MoE pp128 / tg64 | Dense pp128 / tg64 | Verdict |
+|---|---|---|---|
+| Baseline | 129.21 / 14.20 | 82.22 / 2.44 | — |
+| `jetson_clocks` locked | **137.85 / 15.18 (+6.9%)** | 83.62 / **2.46 (+0.8%)** | **only real win** |
+| + `-fa on` | 137.92 / 15.16 | 82.90 / 2.44 | neutral — `auto` already enabled it |
+| + KV `q8_0` | 136.54 / 14.74 (−2.9%) | 82.90 / 2.44 | regression single-stream |
+| + `-ub 1024` | 136.60 / 14.77 | — | neutral |
+
+### Finding: clock-ramp loss scales inversely with per-token work
+
+Locking clocks gained **6.9% on the MoE but only 0.8% on the dense model**. node2's GPU idles at
+306 MHz of 1173 MHz under `schedutil`. Dense tokens take ~410 ms of sustained GPU work, so DVFS has
+ample time to ramp within a single token; the MoE's ~67 ms tokens are short enough that ramp latency
+is a material fraction of the work. **The faster a pipeline gets, the more clock locking matters** —
+and this is invisible in single-node benchmarking, where sustained load keeps clocks high anyway.
+
+Nothing else moved the needle, which is what compute-bound means in practice: levers that trade
+compute for memory (KV quantisation) or amortise round-trips (`-ub`) have nothing to buy when the
+link runs at 8% and memory is not short.
+
+## 9. Correction: the MoE is not single-node-impossible
+
+**Sections 7's MoE column as originally published was wrong.** It stated the MoE exceeded node2's
+allocatable memory by 1.5 GiB. That was *inferred* from a 12.21 GiB reading, not measured — only the
+dense model's single-node controls were actually run. Measured directly afterwards:
+
+```
+MoE on node2 alone: 13.70 GiB model, loads and runs, tg16 = 18.63 t/s (CUDA)
+```
+
+### Root cause: allocatable memory on unified-memory Jetsons is a moving target
+
+The worker reported **12.21 GiB** available mid-session and **13.90 GiB** after a restart freed
+resident memory — the same hardware, a 1.7 GiB swing. The MoE sits between those two figures, so its
+feasibility depended on system state at launch. **Single-node impossibility must be measured at the
+time, against a freshly started worker, not derived from an earlier reading.**
+
+The dense model at 14.87 GiB exceeds even the 13.90 GiB best case, so the primary result stands
+unchanged. But **only the dense 32B demonstrates the combined-memory thesis.**
+
+### The correction yields a better measurement
+
+Because the MoE *does* fit one node, its split run becomes a second overhead measurement — and it
+supplies the relative-penalty number §7 claimed could not be measured:
+
+| Model | Single node | Split across 2 | **Pipeline penalty** |
+|---|---|---|---|
+| Dense 14B Q4 | 7.49 t/s | 7.19 t/s | **−4.0%** |
+| MoE 30B-A3B Q3 | 18.63 t/s | 15.18 t/s | **−18.5%** |
+
+**The pre-recorded Phase 5b prediction is now directly confirmed:** the MoE pays a 4.6× larger
+relative pipeline penalty than the dense model, because its per-token compute is small relative to
+the fixed per-token link and round-trip cost. The practical rule: **split a model only if it does not
+fit — for MoE models the penalty for splitting unnecessarily is steep.**
