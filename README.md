@@ -38,8 +38,17 @@ story entirely, where the limit is encoder count, not bandwidth.
 
 - [docs/HARDWARE.md](docs/HARDWARE.md) — per-node capability and hard limits
 - [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md) — benchmark numbers with method
+- [docs/STORAGE.md](docs/STORAGE.md) — ledger of large artifacts on the cluster
 - [runbooks/k3s-clean-slate.md](runbooks/k3s-clean-slate.md) — reproducible teardown/rebuild
+- [runbooks/pipeline-parallel-llm.md](runbooks/pipeline-parallel-llm.md) — run a model split across the Jetsons
 - [research/](research/) — numbered research log, newest last
+
+## Results so far
+
+A 32.76B-parameter dense model (Qwen3-32B Q3_K_M, 14.87 GiB) runs at 2.46 t/s split across an Orin NX
+and an Orin Nano, having failed to load on either node individually. Aggregate throughput reaches
+5.85 t/s decode at 4 concurrent streams. Details and the measurements that contradicted our
+assumptions are in [research/002](research/002-pipeline-parallel-measurements.md).
 
 ## Method
 
