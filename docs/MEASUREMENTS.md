@@ -110,3 +110,20 @@ ceiling would be ~169 tok/s. Orchestrator CPU at 7.4%. The pipeline is compute-b
 
 Batching gain scales with how **weight-read-bound** the model is: dense streams 14.87 GiB of weights
 per token against the MoE's ~1.4 GiB, so dense benefits more per stream added.
+
+## DLA vs GPU, transformer components at decode shapes (node2, Orin NX)
+
+TensorRT 11.3.0.99 b99, 200 iterations, median GPU-compute ms. Full method: research/003.
+
+| Component | DLA (ms) | GPU (ms) | DLA penalty |
+|---|---|---|---|
+| rmsnorm | 0.1025 | 0.00781 | 13.1x |
+| softmax | 0.0981 | 0.00800 | 12.3x |
+| attn_core | 1.8451 | 0.05475 | 33.7x |
+| qkv_q (5120->8192) | 1.8247 | 0.8428 | 2.17x |
+| conv_8192 | 1.7738 | 0.8428 | 2.10x |
+| ffn_gate_tile (5120->6400) | 1.4313 | 0.6569 | 2.18x |
+| ffn_down_tile (6400->5120) | 1.4008 | 0.6646 | 2.11x |
+
+DLA loses every component. ResNet-18 on DLA core 0: 7.83 ms mean / 127.7 qps (30 iters).
+DLA non-batch dimension cap measured exactly: 8192 passes, 8193 fails.
