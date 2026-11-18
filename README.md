@@ -50,6 +50,11 @@ and an Orin Nano, having failed to load on either node individually. Aggregate t
 5.85 t/s decode at 4 concurrent streams. Details and the measurements that contradicted our
 assumptions are in [research/002](research/002-pipeline-parallel-measurements.md).
 
+The Orin NX's two DLA engines compile more of a transformer block than NVIDIA's own layer table
+documents — RMSNorm, Softmax and the full attention core all build with GPU fallback *disabled* —
+but lose to the GPU by 2.1x to 33.7x at decode shapes, so a ggml DLA backend is not worth building.
+Capability map and numbers in [research/003](research/003-dla-transformer-offload.md).
+
 ## Method
 
 Every entry records what was measured, how, and what the result rules out. Negative results
