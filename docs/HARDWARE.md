@@ -38,5 +38,9 @@
   QSPI bootloader, which is how both units previously needed recovery. Hold the NVIDIA stack
   unless a bootloader flash is actually intended.
 - node3's LAN address is currently unreachable; the backplane and Tailscale paths work.
+- **The DLA device nodes are `/dev/nvhost-ctrl-nvdla0` and `nvdla1`**, not `/dev/nvhost-nvdla*`.
+  A glob for the latter finds nothing and looks like absent hardware; it is not. Verified working
+  2026-11-18: driver `nvhost_nvdla` loaded, both engines probed at boot, firmware
+  `nvhost_nvdla0{2,3}0.fw` present, and a ResNet-18 engine runs on DLA core 0 at 7.85 ms.
 - The Orin Nano has no RTC battery behaviour worth trusting: host SSH keys carry epoch-0 mtimes
   from a first boot before NTP.
