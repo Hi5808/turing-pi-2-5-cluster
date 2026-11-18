@@ -5,7 +5,7 @@ NX 16GB, node3 Jetson Orin Nano 8GB.
 **Software stack:** Ubuntu 24.04.5; JetPack 7.2 / L4T R39.2 / CUDA 13.2 on nodes 2–3;
 llama.cpp @ `704485942ab54bbbbf1f241b3550ffba35f5f37e` (ggml 0.19.0) built identically on all three
 nodes; RPC backend (`ggml-rpc-server`) with CUDA on both Jetsons.
-**Date:** 2026-11-17. **Status:** in progress — Phases 2–4 complete, Phase 5 running.
+**Date:** 2026-11-17/18. **Status:** Phases 2–5b complete; optimization sweep in progress.
 
 ## Abstract
 
@@ -144,13 +144,79 @@ makes "fits on no single node" a measurement rather than an assertion.
 - `pkill -f ggml-rpc-server` kills the SSH session issuing it, because the binary's path appears in
   the invoking command line. The `[g]`-bracket trick does not help when the literal path is present.
 
-## 7. Open
+## 7. The impossible models run
 
-Phase 5 (dense 32B split across both nodes) and Phase 5b (Qwen3-30B-A3B MoE Q3_K_M, 13.70 GiB) are
-pending. The MoE sits below node2's 12.21 GiB allocatable by 1.5 GiB, so both models are genuinely
-single-node-impossible and the dense-vs-MoE comparison holds at constant quantisation.
+Both targets exceed what either node can allocate individually, at constant Q3_K_M quantisation.
 
-**Standing prediction for 5b, recorded before the run:** MoE activates ~3B of 30B parameters per
-token, so each stage does less compute for the same number of round-trips and the same ~594 KiB
-logit return. MoE should therefore be faster in absolute tok/s but pay a *larger relative* pipeline
-penalty, with the link a bigger share of its per-token budget.
+| | Dense Qwen3-32B | MoE Qwen3-30B-A3B |
+|---|---|---|
+| File size | 14.87 GiB (32.76B params) | 13.70 GiB (30.53B params, ~3B active) |
+| node2 alone (12.21 GiB) | **OOM, NvMap error 12** | exceeds by 1.5 GiB |
+| node3 alone (5.39 GiB) | **OOM, NvMap error 12** | exceeds by 8.3 GiB |
+| **node2+node3, pp128** | **82.22 t/s** | **129.21 t/s** |
+| **node2+node3, tg64** | **2.44 t/s** | **14.20 t/s** |
+| tg256 | — | 14.88 t/s |
+| Peak mem node2 | 11678 / 15599 MiB | 11585 / 15599 MiB |
+| Peak mem node3 | 6450 / 7547 MiB | 5304 / 7547 MiB |
+| Swap caused by run | **none** | **none** |
+| Weights shipped from node1 | 15.67 GB | 14.62 GB |
+
+Both produce coherent text. Dense:
+
+> Hello my name is Ashlee and I live in Missouri. I was diagnosed with breast cancer in October
+> 2006. I was 32 at the time. I had a lump in my left breast that was found during my self exam.
+> It was stage 2B. It had already spread to the
+
+MoE:
+
+> Hello my name is Maria I am from Mexico City and I am a 23 year old woman who is very active on
+> the internet and social media I'm a digital marketer and I am currently working as a freelance
+> for the company of my ex boyfriend
+
+**Primary result:** a 32.76B-parameter dense model runs at 2.44 t/s on a chassis where it cannot be
+loaded on any single node, beating node1's CPU inference (~2 t/s) on a model 2.3× smaller. The
+combined-memory thesis holds.
+
+### Swap validity check
+
+node3 reported 105 MiB of swap in use during the dense run. Measuring at idle *before* the next run
+showed the same 105 MiB, and it was unchanged after — so it is pre-existing from earlier activity
+and **no run caused any spill**. Had this not been checked, the headline result would have rested on
+an unexamined confound.
+
+### Finding: MoE is 5.8× faster, and the prediction held
+
+The prediction recorded before the run was that MoE would be faster in absolute terms but pay a
+larger *relative* pipeline penalty, since it does far less compute per token for the same number of
+round-trips and the same logit return.
+
+| | Dense 32B | MoE 30B-A3B |
+|---|---|---|
+| Decode | 2.44 t/s | **14.20–14.88 t/s (5.8–6.1×)** |
+| ms per token | ~410 ms | ~67 ms |
+| Measured inbound per token | ~666 KB | ~617 KB |
+| Transfer time at line rate | ~5.9 ms | ~5.5 ms |
+| **Link as share of token budget** | **~1.4%** | **~8.2%** |
+
+Both halves confirmed. MoE decodes 5.8× faster because only ~3B of 30B parameters are active, and
+the link's share of its per-token budget is ~6× larger — the same absolute transfer cost against a
+6× shorter token. Extrapolating, a pipeline fast enough to reach ~170 tok/s would be bandwidth-bound
+on logits alone; MoE gets meaningfully closer to that wall than dense does.
+
+Per-token traffic is near-identical between the two models despite the architectural difference,
+which independently confirms section 4: the cost is the logit return, set by the shared 151,936
+vocabulary, not by parameter count or activation sparsity.
+
+### Finding: an explicitly specified split can fail outright
+
+`llama-bench --tensor-split 69,31` — the capacity-derived ratio from section 2 — **failed to load
+the dense model entirely**, with only 18 KB leaving node1 (i.e. it aborted before weight transfer,
+not an OOM mid-load). The identical run without `--tensor-split`, letting llama.cpp allocate by free
+memory, loaded and ran.
+
+The likely mechanism is that large indivisible tensors (token embeddings, output head) are placed
+whole on one device and do not obey the ratio, so a hand-tuned split that looks feasible on
+aggregate numbers can leave one device unable to satisfy an allocation. **Practical consequence:
+prefer the automatic allocator.** This inverts the plan's intent to hand-tune the split from
+measured capacity — the measurement was useful for understanding the constraint, and actively
+harmful as a configuration.
