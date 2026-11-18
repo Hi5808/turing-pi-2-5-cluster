@@ -304,3 +304,45 @@ supplies the relative-penalty number §7 claimed could not be measured:
 relative pipeline penalty than the dense model, because its per-token compute is small relative to
 the fixed per-token link and round-trip cost. The practical rule: **split a model only if it does not
 fit — for MoE models the penalty for splitting unnecessarily is steep.**
+
+## 10. Dense batching: the prediction failed, and the mechanism was wrong
+
+`llama-batched-bench`, dense Qwen3-32B Q3_K_M, `-npp 128 -ntg 32`, `-c 2048`, KV q8_0, clocks locked:
+
+| Streams (B) | N_KV | Prompt t/s | Decode t/s | Total t/s |
+|---|---|---|---|---|
+| 1 | 160 | 71.67 | 2.41 | 10.61 |
+| 2 | 320 | 79.78 | 4.31 (1.79×) | 17.71 |
+| 4 | 640 | 81.92 | **5.85 (2.43×)** | 22.76 |
+
+**Pre-recorded prediction: dense would scale *worse* than the MoE**, on the reasoning that dense
+tokens already do ~410 ms of sustained GPU work so the GPUs are not idle between round-trips, leaving
+batching less slack to reclaim.
+
+**The prediction failed.** At matched stream count dense scales *better*: **2.43× at B=4 against the
+MoE's 1.87× at B=4.**
+
+### The mechanism was misidentified
+
+The gain is not from filling idle time between round-trips. It is **weight-read amortisation**. Dense
+decode streams all 14.87 GiB of weights out of memory per token; the MoE activates only ~3B of 30B
+parameters, roughly 1.4 GiB per token. The dense model therefore has ~10× more weight traffic to
+spread across concurrent streams, and benefits proportionally more.
+
+**Corrected rule: batching gain scales with how weight-read-bound the model is**, not with idle GPU
+time. The corollary is visible in the prompt-eval column: dense prompt processing gains only 1.14×
+(71.67 → 81.92) while the MoE gained 2.5×, because dense prompt eval is already compute-saturated and
+has no spare memory bandwidth to reclaim.
+
+### Validity caveat on B=4
+
+node2's swap rose from 1 MiB to **263 MiB** across these runs — unlike node3's pre-existing 105 MiB
+(§7), this spill *was* caused by the runs. The B=4 figure is therefore affected by memory pressure and
+should be read as a soft upper bound rather than a clean measurement. N_KV 640 against a 14.87 GiB
+model is at the edge of this chassis's capacity.
+
+This also explains the earlier silent crash of this benchmark: the first attempt used `-c 4096`, and
+all three levels died without an error or an OOM message on node1 while the workers retained the
+model. At `-c 2048` all three levels completed with `exit=0`. **Lesson: on unified-memory devices the
+failure mode for an over-large KV allocation can be a silent client death, not a diagnosable OOM** —
+so per-level raw logs and recorded exit codes are necessary to tell a crash from an empty result.
