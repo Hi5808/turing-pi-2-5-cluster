@@ -127,3 +127,36 @@ TensorRT 11.3.0.99 b99, 200 iterations, median GPU-compute ms. Full method: rese
 
 DLA loses every component. ResNet-18 on DLA core 0: 7.83 ms mean / 127.7 qps (30 iters).
 DLA non-batch dimension cap measured exactly: 8192 passes, 8193 fails.
+
+### DLA/GPU concurrency and prefill shapes (node2, Orin NX) — 2026-11-18
+
+`qkv_q` 5120→8192 GEMM-as-1×1-conv, same engine per device, 20 s per scenario, TRT 11.3.0.99.
+83.89 MB fp16 weights read per inference, so qps → DRAM bandwidth directly. Module peak 102.4 GB/s.
+
+| Scenario | Total qps | GB/s | % of peak |
+|---|---|---|---|
+| GPU alone | 1182.5 | 99.2 | 97% |
+| DLA0 alone | 592.4 | 49.7 | 49% |
+| DLA0 + GPU | 1025.5 | 86.0 | 84% |
+| DLA0 + DLA1 | 539.8 | 45.3 | 44% |
+| DLA0 + DLA1 + GPU | 1046.1 | 87.8 | 86% |
+
+The GPU alone saturates memory bandwidth; DLA+GPU is 13% *slower* than GPU alone; the two DLA
+engines are slower together than one. DLA is not an additive second compute stream for
+bandwidth-bound work.
+
+Prefill shapes (token count in W; decode used W=1), strict DLA, chw16, 200 iterations:
+
+| Component | Tokens | DLA | GPU qps |
+|---|---|---|---|
+| qkv_q / ffn_gate_tile / ffn_down_tile / rmsnorm | 128 | DLA compile error 8 | 973.0 / 1143.8 / 1210.1 / 2479.3 |
+| qkv_q / ffn_gate_tile / ffn_down_tile / rmsnorm | 512 | DLA compile error 8 | 336.8 / 357.2 / 424.4 / 611.2 |
+| softmax | 128 | 840.9 | 5116.1 |
+| softmax | 512 | 54.6 | 431.0 |
+| attn_core | 128 | 94.0 | 2933.7 |
+
+Convs that compile at W=1 fail at W=128/512 with `DLA Compile exception` / error code 8 on
+`ForeignNode[/c/Conv]` — a shape rejection, not the 8192 cap (all dims ≤ 6400).
+
+Method: `run007.sh` (concurrency), `export3.py` + `run008.sh` (prefill), on node2 in
+`/home/orinnx/dla-transformer/`.

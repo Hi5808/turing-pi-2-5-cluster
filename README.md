@@ -53,7 +53,11 @@ assumptions are in [research/002](research/002-pipeline-parallel-measurements.md
 The Orin NX's two DLA engines compile more of a transformer block than NVIDIA's own layer table
 documents — RMSNorm, Softmax and the full attention core all build with GPU fallback *disabled* —
 but lose to the GPU by 2.1x to 33.7x at decode shapes, so a ggml DLA backend is not worth building.
-Capability map and numbers in [research/003](research/003-dla-transformer-offload.md).
+Follow-up measurement killed the consolation prize too: the GPU alone already uses **97% of the
+module's 102 GB/s**, so DLA+GPU is 13% *slower* than the GPU by itself and the two DLA engines are
+slower together than one — the DLA is not an additive second compute stream. At prefill shapes it
+will not even compile. Capability map, concurrency table and the corrections are in
+[research/003](research/003-dla-transformer-offload.md).
 
 ## Method
 

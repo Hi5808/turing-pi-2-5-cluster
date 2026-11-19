@@ -173,11 +173,11 @@ batch-1 operations.
 
 ### What the DLA *is* worth on this cluster
 
-The engines are real, working and idle, and the measured 2.1× penalty on convolutions is modest.
-The value is **concurrency, not acceleration**: run a CNN workload (vision preprocessing,
-upscaling — `esrgan128-dla0.engine` already exists) on the DLA *while* the GPU serves LLM decode,
-buying throughput the GPU would otherwise have to timeshare. ResNet-18 at 7.83 ms / 127.7 qps is
-a usable second compute stream.
+**Corrected 2026-11-18.** An earlier revision of this section claimed the DLA's value was
+**concurrency, not acceleration** — a second compute stream running CNN work while the GPU serves
+LLM decode. That claim was asserted, not measured. It has now been measured, and it is **wrong**:
+see §6b. The GPU alone already consumes 97% of the module's memory bandwidth, so there is no
+headroom for a second engine, and adding the DLA *reduces* total throughput.
 
 This reframes project 001's fourth design constraint. The DLA does not raise node2's effective
 capacity for LLM work and should **not** change the pipeline split. It is a parallel engine for a
@@ -203,11 +203,75 @@ LD_LIBRARY_PATH=$T/lib $T/bin/trtexec --onnx=COMPONENT.onnx --useDLACore=0 --ite
 `T=/home/orinnx/dla-trt11/TensorRT-11.3.0.99`. The venv at `~/dla-trt11/venv` holds torch 2.14.0
 and onnx 1.23.0; system pip is PEP 668-blocked.
 
+## 6b. Concurrency and prefill, measured (2026-11-18)
+
+Both of this document's original open questions are now answered, and both answers went against
+the expectation written down here first.
+
+### Concurrency is not additive — the GPU is already bandwidth-saturated
+
+`qkv_q` (5120→8192 GEMM-as-1×1-conv), identical engine on each device, 20 s per scenario,
+throughput in inferences/s. Each inference reads 5120×8192×2 = 83.89 MB of fp16 weights, which
+converts qps directly to DRAM bandwidth. Orin NX 16GB peak is 102.4 GB/s.
+
+| Scenario | Total qps | GB/s | % of peak |
+|---|---|---|---|
+| **GPU alone** | **1182.5** | 99.2 | **97%** |
+| DLA0 alone | 592.4 | 49.7 | 49% |
+| DLA0 + GPU | 1025.5 | 86.0 | 84% |
+| DLA0 + DLA1 | 539.8 | 45.3 | 44% |
+| DLA0 + DLA1 + GPU | 1046.1 | 87.8 | 86% |
+
+Three findings:
+
+1. **The GPU alone saturates memory bandwidth at 97% of peak.** This workload is bandwidth-bound,
+   not compute-bound, so there is nothing left for a second engine to use.
+2. **DLA + GPU is 13% *slower* than the GPU alone** (1025.5 vs 1182.5 qps). The DLA does not add
+   capacity; it takes bandwidth and adds contention.
+3. **The two DLA engines do not scale with each other** — 539.8 qps together vs 592.4 for one.
+   Two engines are slower in aggregate than one.
+
+No combination beats the GPU by itself. The "second compute stream" framing is therefore
+unsupported *for any bandwidth-bound workload*, which includes LLM decode and, by the ResNet-18
+weight-reuse argument, most CNN inference at batch 1 as well.
+
+### At prefill shapes the DLA mostly will not compile
+
+Components re-exported with the token count in the W spatial dim (decode used W=1), strict DLA,
+`chw16`, 200 iterations:
+
+| Component | Tokens | DLA | GPU qps | Result |
+|---|---|---|---|---|
+| qkv_q | 128 / 512 | **compile error 8** | 973.0 / 336.8 | DLA rejected |
+| ffn_gate_tile | 128 / 512 | **compile error 8** | 1143.8 / 357.2 | DLA rejected |
+| ffn_down_tile | 128 / 512 | **compile error 8** | 1210.1 / 424.4 | DLA rejected |
+| rmsnorm | 128 / 512 | **compile error 8** | 2479.3 / 611.2 | DLA rejected |
+| softmax | 128 | 840.9 qps | 5116.1 | GPU 6.1× |
+| softmax | 512 | 54.6 qps | 431.0 | GPU 7.9× |
+| attn_core | 128 | 94.0 qps | 2933.7 | GPU 31.2× |
+
+The failure is `Error Code 2: DLA Compile exception` / `DLA Compilation failed ... error code 8`
+on `ForeignNode[/c/Conv]` — the *same* convolutions that compile successfully at W=1. So this is a
+shape rejection, not a layer-support one, and it is not the 8192 cap (all dims are ≤ 6400).
+
+This reverses the guess recorded in §8: prefill was expected to be DLA's best case because of its
+throughput orientation. Instead it is where the DLA stops working altogether.
+
+`p512_attn_core` was still compiling when this was written and is not included.
+
+### Net effect on the verdict
+
+The verdict — **do not build a ggml DLA backend** — is unchanged and now rests on firmer ground.
+But two of the reasons originally given for it were wrong: concurrency was presented as the
+DLA's redeeming use and is not available, and prefill was dismissed as unable to change the
+verdict when in fact it strengthens it. The conclusion was right for reasons that were not.
+
 ## 8. Open
 
-- Does DLA win at **prefill** shapes (large batched matmuls), where its throughput orientation
-  fits? Not tested — but it cannot change the verdict, since prefill is already GPU
-  compute-bound and not the bottleneck measured in 002.
 - Does `kADJUST_FOR_DLA` (available, left `Disabled` in all runs) change any rejection?
-- Concurrency has not been measured: DLA ResNet-18 and GPU LLM decode running simultaneously,
-  to confirm the second stream is additive rather than contended on the shared 102 GB/s.
+- What exactly does DLA compile error 8 object to in a 1×1 conv at W>1? The limit is undocumented
+  and is not the 8192 non-batch cap.
+- Is any *compute*-bound workload (high arithmetic intensity, small weights) additive across DLA
+  and GPU? Every workload measured here was bandwidth-bound, so the concurrency result should not
+  be over-generalized to e.g. large-batch CNN inference with heavy weight reuse.
+- `p512_attn_core`: build was still running.
