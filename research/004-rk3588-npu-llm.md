@@ -78,26 +78,74 @@ exploit. The difference is the baseline they are measured against: the Orin GPU 
 memory bandwidth, so the DLA has nothing to add, whereas node1's A76 cores are weak enough that
 its NPU has real headroom to beat them at prefill.
 
-## Consequence for the cluster
+## Consequence for the cluster — measured, and the idea is dead
 
-Project 001 constraint 1 said node1 cannot be a pipeline stage because pipeline throughput equals
-the slowest stage. That reasoning is about **decode**, and it stands — 9.67 t/s on the NPU is
-still slower than node1's own CPU and far slower than either Orin GPU.
+**Updated 2026-11-18, same day.** The section this replaces proposed node1 as a *prefill* stage
+(NPU ingests the prompt at ~220 t/s, KV cache ships to an Orin for decode) and named the
+KV-transfer cost over the ~119 MB/s backplane as the go/no-go. Both the proposal and the stated
+decider were wrong. Measured:
 
-But prefill is a separate stage with separate economics. A prefill-only role for node1 — NPU
-ingests the prompt at ~220 t/s, KV cache ships to an Orin for decode — is not ruled out by
-anything measured here, and it uses the one engine in the chassis that is otherwise completely
-idle. Whether the KV-cache transfer cost eats the gain is the open question, and on this
-interconnect that is the question that decides it: 001 measured ~119 MB/s between nodes, and a
-1.1B-class KV cache for a long prompt is far larger than the ~10 KB/token of activations that
-made pipeline parallelism viable in the first place.
+### 1. An Orin prefills ~10x faster than node1's NPU
+
+Same model, same quantization class, `llama-bench -ngl 99` over the RPC backend to node2:
+
+| Engine | prefill pp128 | prefill pp512 | decode |
+|---|---|---|---|
+| node1 NPU (3 cores, w8a8) | 219.94 t/s | — | 9.67 t/s |
+| node1 CPU (8 threads, Q8_0) | 110.73 ± 3.61 | — | 16.11 ± 2.28 |
+| **node2 Orin NX (CUDA, Q8_0)** | **1966.82 ± 178.43** | **2269.58 ± 41.36** | **45.31 ± 0.40** |
+
+The NPU's 2.0x win over node1's own CPU is real but irrelevant: the Orin beats the NPU by
+**8.9-10.3x at prefill** and 4.7x at decode. There is no prompt length at which routing prefill
+to node1 beats simply prefilling on the node that will decode. The Orin figures are measured
+*through* RPC while node2 was also running a DLA compile on one of its eight cores, so node2's
+native rate is at least this high — which only widens the gap.
+
+### 2. The NPU cannot host the models the cluster exists to run
+
+KV geometry read from the GGUF metadata, not estimated:
+
+| Model | n_layer | n_head_kv | n_embd_head | KV per token |
+|---|---|---|---|---|
+| TinyLlama-1.1B | 22 | 4 | 64 | 22,528 B (22 KiB) |
+| Qwen3-32B | 64 | 8 | 128 | 262,144 B (**256 KiB**) |
+
+Qwen3-32B — the model 002 runs split across the two Orins — would need ~32 GB of w8a8 weights
+against node1's 31 GB of RAM, before any KV cache. It cannot be hosted on the NPU at all, and a
+KV cache is model-specific, so prefilling a *different, smaller* model on node1 produces a cache
+no Orin can consume. The idea fails on capacity before bandwidth is even consulted.
+
+### 3. Transfer cost was never the blocker
+
+Measured backplane node1 -> node2: **105.1 MB/s** over SSH (600 MB in 5.71 s; 001's clean
+119 MB/s is line rate without encryption).
+
+| Model | Prompt | KV size | Transfer | Prefill on Orin pipeline |
+|---|---|---|---|---|
+| Qwen3-32B | 512 | 134.2 MB | 1.28 s | 7.1 s |
+| Qwen3-32B | 2048 | 536.9 MB | 5.11 s | 28.6 s |
+| Qwen3-32B | 8192 | 2147.5 MB | 20.43 s | 114.3 s |
+
+Transfer is ~18% of prefill time — affordable. Had capacity and prefill rate permitted the
+split, the wire would **not** have stopped it. Naming the transfer as the decider was a guess,
+and it was the wrong guess.
+
+### Net
+
+**Project 001 constraint 1 stands unmodified: node1 orchestrates and holds nothing hot.** Not
+because its CPU is weak — that part of 001's reasoning was incomplete — but because every engine
+on node1, NPU included, is an order of magnitude behind an Orin at both phases of inference, and
+because node1 cannot hold the model. The NPU's only defensible use on this cluster is work the
+Orins are not doing at all, on a model small enough to fit, at a time when the Orins are
+saturated. That is a narrow enough window that it should not shape the architecture.
 
 ## Open
 
-- KV-cache size and transfer time for a realistic prompt vs the prefill time saved. This is the
-  go/no-go for a prefill stage and has not been measured.
-- Does the NPU win at prefill for a *larger* model, or does the 2x shrink as weights stop fitting
-  the NPU's SRAM?
+- Is there any model both the NPU and an Orin can host where the NPU's prefill is competitive?
+  Everything measured says no, but only TinyLlama-1.1B was tested on the NPU because it is the
+  one converted `.rkllm` on hand; conversion requires the x86 rknn-llm toolkit.
+- Does the NPU beat the *Orins* at anything? CNN inference is its design target and was not
+  measured; `yolov5s_relu_rk3588.rknn` is on node1 for exactly this.
 - `rknn-toolkit-lite2` is installed and a `yolov5s_relu_rk3588.rknn` model exists on node1; CNN
   throughput was not measured here and is the NPU's actual design target.
 - The Mali-G610 was not considered. It is a third idle engine on node1.

@@ -179,3 +179,28 @@ NPU state (corrects "driver present, no userland"): `/dev/dri/renderD129` DRIVER
 `npu@fdab0000` status=okay, devfreq 1.0 GHz, librknnrt 2.3.2, rknn-toolkit-lite2 2.3.2.
 
 Caveat: rkllama reports `total_duration` in ns but `eval_duration`/`prompt_eval_duration` in ms.
+
+### node1 NPU vs Orin NX, and KV-cache transfer (2026-11-18)
+
+TinyLlama-1.1B, `llama-bench -ngl 99` to node2 over the RPC backend:
+
+| Engine | pp128 | pp512 | decode |
+|---|---|---|---|
+| node1 NPU (3 cores, w8a8) | 219.94 | — | 9.67 |
+| node1 CPU (8 threads, Q8_0) | 110.73 ± 3.61 | — | 16.11 ± 2.28 |
+| node2 Orin NX (CUDA, Q8_0) | 1966.82 ± 178.43 | 2269.58 ± 41.36 | 45.31 ± 0.40 |
+
+Orin prefills 8.9–10.3x faster than node1's NPU and decodes 4.7x faster. Orin measured through
+RPC with a DLA compile occupying one of its cores, so its native rate is at least this high.
+
+Backplane node1 -> node2: **105.1 MB/s** over SSH (600 MB in 5.71 s); 119 MB/s is line rate.
+
+KV cache per token, from GGUF metadata (`2 * n_layer * n_head_kv * n_embd_head * 2` bytes, f16):
+
+| Model | n_layer | n_head_kv | n_embd_head | KV/token |
+|---|---|---|---|---|
+| TinyLlama-1.1B | 22 | 4 | 64 | 22 KiB |
+| Qwen3-32B | 64 | 8 | 128 | 256 KiB |
+
+Qwen3-32B KV transfer vs prefill: 2048 tok = 536.9 MB = 5.11 s against 28.6 s of prefill (~18%).
+Transfer is affordable; it was never the blocker. Capacity is: 32B w8a8 exceeds node1's 31 GB.
