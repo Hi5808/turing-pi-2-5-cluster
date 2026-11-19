@@ -59,6 +59,13 @@ slower together than one — the DLA is not an additive second compute stream. A
 will not even compile. Capability map, concurrency table and the corrections are in
 [research/003](research/003-dla-transformer-offload.md).
 
+node1's 3-core RK3588 NPU — recorded in earlier notes as having no userland, which was wrong — is
+**2.0x faster than node1's own CPU at prefill** (219.9 vs 110.7 t/s) and **1.7x slower at decode**
+(9.67 vs 16.11 t/s), with all three cores evenly loaded at ~62% and none saturated. Same
+fixed-function signature as the DLA, opposite prefill outcome. This reopens project 001's claim
+that node1 can only orchestrate: it cannot be a *decode* stage, but a prefill stage is not ruled
+out. [research/004](research/004-rk3588-npu-llm.md).
+
 ## Method
 
 Every entry records what was measured, how, and what the result rules out. Negative results

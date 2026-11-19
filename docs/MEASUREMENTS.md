@@ -160,3 +160,22 @@ Convs that compile at W=1 fail at W=128/512 with `DLA Compile exception` / error
 
 Method: `run007.sh` (concurrency), `export3.py` + `run008.sh` (prefill), on node2 in
 `/home/orinnx/dla-transformer/`.
+
+### RK3588 NPU vs node1 CPU, TinyLlama 1.1B (node1) — 2026-11-18
+
+NPU: `TinyLlama-1.1B-plain-w8a8` (1.26 GB) via rkllama 0.0.75 / librkllmrt, 3 NPU cores.
+CPU: `tinyllama-1.1b-chat-v1.0.Q8_0.gguf` (1.09 GiB) via llama-bench, `-t 8 -r 2`.
+
+| Workload | NPU | node1 CPU | Winner |
+|---|---|---|---|
+| Prefill | 219.94 t/s | 110.73 ± 3.61 | NPU 1.99x |
+| Decode | 9.67 t/s | 16.11 ± 2.28 | CPU 1.67x |
+
+Decode stable at 9.67–9.76 t/s across 4 runs. `/sys/kernel/debug/rknpu/load` during decode:
+Core0 64%, Core1 62%, Core2 60% — all three cores used, none saturated, so decode is dispatch/
+latency-bound rather than NPU-compute- or DRAM-bound (~12.2 GB/s moved).
+
+NPU state (corrects "driver present, no userland"): `/dev/dri/renderD129` DRIVER=RKNPU,
+`npu@fdab0000` status=okay, devfreq 1.0 GHz, librknnrt 2.3.2, rknn-toolkit-lite2 2.3.2.
+
+Caveat: rkllama reports `total_duration` in ns but `eval_duration`/`prompt_eval_duration` in ms.
