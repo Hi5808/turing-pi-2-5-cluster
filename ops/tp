@@ -1,0 +1,111 @@
+#!/bin/bash
+# tp - operate the Turing Pi 2.5 board from this laptop.  Run `tp help`.
+D="$(cd "$(dirname "$0")" && pwd)"
+KH="${TP_KNOWN_HOSTS:-$D/known_hosts}"   # created on first use; not tracked
+SSHO=(-o BatchMode=yes -o ConnectTimeout=6 -o LogLevel=ERROR -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$KH")
+BMC=10.43.0.10
+addr(){ case $1 in 1) echo ubuntu@10.43.0.1;; 2) echo orinnx@10.43.0.12;; 3) echo orin1@10.43.0.13;; *) echo "node must be 1, 2 or 3" >&2; return 1;; esac; }
+name(){ case $1 in 1) echo "node1 RK1";; 2) echo "node2 Orin NX";; 3) echo "node3 Orin Nano";; esac; }
+nssh(){ local n=$1; shift; ssh "${SSHO[@]}" "$(addr $n)" "$@"; }
+bmc(){ SSHPASS="${TP_BMC_PASS:-turing}" sshpass -e ssh -o ConnectTimeout=8 -o LogLevel=ERROR -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$KH" root@$BMC "$@"; }
+confirm(){ read -r -p "$1 [type yes] " a; [ "$a" = yes ] || { echo "cancelled"; exit 1; }; }
+
+status_one(){ local n=$1
+  if ! out=$(nssh $n '
+    up=$(uptime -p); load=$(cut -d" " -f1 /proc/loadavg)
+    mem=$(free -m | awk "NR==2{printf \"%d/%dMB\",\$3,\$2}")
+    if [ -e /dev/nvhost-gpu ]; then gpu="GPU ok"; elif [ -e /dev/mali0 ]; then gpu="Mali ok"; else gpu="GPU MISSING"; fi
+    nv=$(df -h / /mnt/nvme 2>/dev/null | awk "NR>1{print \$6\":\"\$5}" | tr "\n" " ")
+    t=$(cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | sort -n | tail -1); t=$((t/1000))
+    echo "$up | load $load | mem $mem | $gpu | ${t}C | disk $nv"' 2>&1); then
+    echo "  $(name $n): UNREACHABLE"; return 1; fi
+  echo "  $(name $n): $out"; }
+
+case "${1:-help}" in
+status) echo "== nodes"; for n in 1 2 3; do status_one $n; done
+  echo "== power (BMC)"; bmc 'tpi power status' 2>&1 | grep node | tr '\n' ' '; echo
+  echo "== internet via node1"; nssh 1 'curl -s -m 5 -o /dev/null -w "%{http_code}" http://connectivitycheck.gstatic.com/generate_204 | grep -q 204 && echo "  online" || echo "  OFFLINE (check wifi: tp wifi)"' ;;
+ssh) shift; n=$1; shift; nssh $n "$@" ;;
+shell) n=$2; exec ssh -o LogLevel=ERROR -o UserKnownHostsFile="$KH" -o StrictHostKeyChecking=accept-new "$(addr $n)" ;;
+gpu) for n in ${2:-2 3}; do nssh $n 'echo "$(hostname): $( [ -e /dev/nvhost-gpu ] && echo GPU_OK || echo GPU_MISSING ); last selfheal: $(tail -1 /var/lib/gpu-selfheal/history.log 2>/dev/null)"'; done ;;
+shutdown) n=$2; confirm "Gracefully shut down $(name $n)?"; nssh $n 'sudo shutdown -h now' ; echo "sent. wait ~30 s, then: tp power off $n" ;;
+reboot) n=$2; confirm "Warm reboot $(name $n) (preferred: avoids the cold-boot GPU failure)?"; nssh $n 'sudo reboot'; echo "sent. check in ~2 min: tp status" ;;
+power) act=$2; n=$3
+  case $act in
+   status) bmc 'tpi power status' ;;
+   on) bmc "tpi power on -n $n" ;;
+   off) confirm "Cut POWER to $(name $n)? (Hard cut. Prefer 'tp shutdown $n' first.)"; bmc "tpi power off -n $n" ;;
+   cycle) confirm "HARD power-cycle $(name $n)? Data risk if not shut down first; may cause a GPU cold-boot failure (self-heal fixes it in ~3 min)."; bmc "tpi power off -n $n"; sleep 5; bmc "tpi power on -n $n"; echo "on. wait ~2-3 min: tp status" ;;
+   *) echo "usage: tp power status | on N | off N | cycle N" ;; esac ;;
+console) n=$2; bmc "tpi uart -n $n get" | tail -${3:-40} ;;
+bmc) shift; bmc "$@" ;;
+fan) bmc 'tpi cooling status' ;;
+wifi) nssh 1 'nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi 2>/dev/null | grep "^yes"; ip -br a | grep -E "wl|end|eth"' ;;
+logs) n=$2; nssh $n 'sudo journalctl -p warning -b --no-pager | tail -30' ;;
+disk) for n in 1 2 3; do echo "== $(name $n)"; nssh $n 'sudo nvme smart-log /dev/nvme0n1 2>/dev/null | grep -E "critical_warning|temperature|percentage_used|media_errors|unsafe_shutdowns"'; done ;;
+record) # append one health line per node to the history CSV (used by cron/timer)
+  H="$D/history.csv"; [ -f "$H" ] || echo "time,node,reachable,uptime_s,gpu_ok,temp_c,mem_used_mb,unsafe_shutdowns" > "$H"
+  now=$(date -Is)
+  for n in 1 2 3; do
+    o=$(nssh $n 'u=$(cut -d. -f1 /proc/uptime); if [ -e /dev/nvhost-gpu ] || [ -e /dev/mali0 ]; then g=1; else g=0; fi
+      t=$(cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | sort -n | tail -1); m=$(free -m | awk "NR==2{print \$3}")
+      us=$(sudo -n nvme smart-log /dev/nvme0n1 2>/dev/null | awk "/unsafe_shutdowns/{print \$3}")
+      echo "1,$u,$g,$((t/1000)),$m,$us"' 2>/dev/null) || o="0,,,,,"
+    echo "$now,$n,$o" >> "$H"
+  done; if [ -t 1 ]; then tail -3 "$H"; fi ;;
+history) H="$D/history.csv"; [ -f "$H" ] || { echo "no history yet: run 'tp record' (or 'tp record-install' for every 10 min)"; exit 0; }
+  python3 - "$H" <<'PY'
+import csv,sys,collections
+rows=list(csv.DictReader(open(sys.argv[1]))); by=collections.defaultdict(list)
+for r in rows: by[r['node']].append(r)
+for n,v in sorted(by.items()):
+    ok=sum(1 for r in v if r['reachable']=='1'); gpu=[r for r in v if r['reachable']=='1' and r['gpu_ok']=='0']
+    print(f"node{n}: {len(v)} samples, reachable {ok}/{len(v)}, GPU/accelerator missing {len(gpu)}, first {v[0]['time'][:16]}, last {v[-1]['time'][:16]}, unsafe_shutdowns now {v[-1]['unsafe_shutdowns']}")
+PY
+  ;;
+record-install) mkdir -p ~/.config/systemd/user; cat > ~/.config/systemd/user/tp-record.service <<U
+[Unit]
+Description=Record Turing Pi board health
+[Service]
+Type=oneshot
+ExecStart=$D/tp record
+U
+  cat > ~/.config/systemd/user/tp-record.timer <<U
+[Unit]
+Description=Record Turing Pi board health every 10 minutes
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+[Install]
+WantedBy=timers.target
+U
+  systemctl --user daemon-reload && systemctl --user enable --now tp-record.timer && echo "installed: recording every 10 min to $D/history.csv (view: tp history; remove: tp record-remove)" ;;
+record-remove) systemctl --user disable --now tp-record.timer 2>/dev/null; rm -f ~/.config/systemd/user/tp-record.{service,timer}; systemctl --user daemon-reload; echo removed ;;
+bench) what=${2:-llm}; out="$D/bench-$(date +%Y%m%d-%H%M%S).txt"
+  [ "$what" = llm ] || { echo "usage: tp bench llm   (decode+prefill of the common Qwen3-1.7B Q4_K_M model on every node)"; exit 1; }
+  { echo "# tp bench llm  $(date -Is)"
+    echo "## node1 RK1 CPU, 4 big cores"; nssh 1 'taskset -c 4-7 /mnt/nvme/llama.cpp/build/bin/llama-bench -m /mnt/nvme/qwen3-1.7b-q4km.gguf -p 512 -n 128 -r 3 -t 4 -o md 2>&1 | tail -5'
+    echo "## node2 Orin NX CUDA"; nssh 2 '~/llama.cpp/build/bin/llama-bench -m ~/qwen3-1.7b-q4km.gguf -p 512 -n 128 -r 3 -ngl 99 -o md 2>&1 | tail -5'
+    echo "## node3 Orin Nano CUDA"; nssh 3 '~/llama.cpp/build-triage/bin/llama-bench -m ~/qwen3-1.7b-q4km.gguf -p 512 -n 128 -r 3 -ngl 99 -o md 2>&1 | tail -5'
+  } 2>&1 | tee "$out"; echo "saved: $out"
+  echo "Reference (2026-09-24): NX 1748/43.8, Nano 1559/39.4, RK1 CPU 47.7/19.7 (prefill/decode tok/s)" ;;
+help|*) cat <<H
+tp - Turing Pi 2.5 operator command
+  tp status               health of all nodes + power + internet (start here)
+  tp shell N              interactive shell on node N (1=RK1, 2=Orin NX, 3=Orin Nano)
+  tp ssh N 'cmd'          run one command on node N
+  tp gpu [N]              is the Jetson GPU up? last self-heal event
+  tp logs N               recent warnings/errors on node N
+  tp disk                 NVMe health of all nodes
+  tp reboot N             graceful warm reboot (safe, preferred)
+  tp shutdown N           graceful halt, then: tp power off N
+  tp power status|on N|off N|cycle N   BMC power control (hard cuts ask first)
+  tp console N [lines]    read node N's serial console via the BMC
+  tp fan                  fan status;  tp wifi   node1 wifi state
+  tp bmc '<tpi command>'  raw BMC command, e.g. tp bmc 'tpi info'
+  tp record | history     log board health to history.csv / summarise it
+  tp record-install|-remove   record automatically every 10 min (laptop timer)
+  tp bench llm            re-run the standard LLM benchmark on every node
+Docs: ~/turing-pi/ops/RUNBOOK.md
+H
+;; esac
