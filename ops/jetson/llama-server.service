@@ -25,6 +25,11 @@ ExecStart=/bin/bash /home/CHANGEME/start_llama.sh
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=300
+# Cap shutdown. llama-server holds a large CUDA allocation and systemd's default 90 s stop
+# timeout is a candidate for part of the ~199 s pre-Linux reboot cost measured in A43. With
+# persistent journald (journald-persistent.conf) the next reboot's shutdown log will show
+# whether this actually helps -- UNVERIFIED as of 2026-11-24.
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target
