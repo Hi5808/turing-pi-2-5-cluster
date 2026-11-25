@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 44 | 54% |
+| ✅ WORKS | 45 | 53% |
 | 🟡 PARTIAL | 11 | 13% |
-| ❌ FAILS | 13 | 16% |
+| ❌ FAILS | 15 | 18% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 11% |
-| **Total** | **82** | |
+| **Total** | **85** | |
 
 ## A compute
 
@@ -122,6 +122,9 @@
 | F06 | Custom kernel / DVFS / thermal soak | any |  | 🟡 PARTIAL | MEASURED | 5 min all-core CPU soak: no throttling (RK1 2256 MHz, 62 C; NX 1984 MHz, Tj 72 C; Nano 1728 MHz, Tj 66 C) | [2026-09-24_cpu-thermal-soak](logs/2026-09-24_cpu-thermal-soak.md) |
 | F07 | Secure boot / fuses | any |  | ⬜ UNTESTED | PLANNED |  |  |
 | F08 | BMC controls and sensors (inventory) | any |  | ✅ WORKS | MEASURED | power/usb/uart/cooling controls work; no node power telemetry; fan 6/6 | [2026-09-24_bmc-inventory](logs/2026-09-24_bmc-inventory.md) |
+| A39 | Internal switch reaches 1GbE line rate | any |  | ✅ WORKS | MEASURED | iperf3: node1->node2 937, node1->node3 936, node2->node3 941 Mbit/s receiver; full duplex node2<->node3 789+804=1593 Mbit/s aggregate; RTT 0.391-0.439 ms avg |  |
+| A40 | Shared NFS store is a performance win | any |  | ❌ FAILS | MEASURED | 90.7 MB/s read over the carrier switch (dd 2GiB O_DIRECT) vs 2.0 GB/s on node2's own NVMe and 1.9 GB/s on node3's = 22x penalty. NFS also costs ~22% of the wire (726 of 937 Mbit/s) |  |
+| A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 
 ## G reliability
 

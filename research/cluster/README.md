@@ -9,6 +9,7 @@ honestly filed under one board.
 | [001](001-heterogeneous-llm-pipeline.md) | A 32B model runs split across the two Orins when it OOMs on either alone | complete |
 | [002](002-pipeline-parallel-measurements.md) | The cost of splitting: 4% dense, 18.5% MoE; logit return dominates wire cost | complete |
 | [008](008-serving-capacity-knee.md) | Serviceable capacity is 4 concurrent streams, not the 16 slots or the 61 tok/s peak | complete |
+| [009](009-what-the-carrier-buys.md) | The carrier's switch and shared store confer no capability the modules lack; its value is packaging | complete — negative result |
 
 **Candidate channels:** homelab / self-hosted / local-LLM communities. Confirm the exact subreddit
 names and their self-promotion rules before posting.
