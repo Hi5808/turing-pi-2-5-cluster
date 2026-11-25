@@ -1,0 +1,191 @@
+[
+ {
+  "arm": "d2_1",
+  "n": 1,
+  "agg_qps": 2242.9,
+  "per": [
+   {
+    "core": 0,
+    "qps": 2242.9,
+    "mean_ms": 0.444497
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 15.6,
+  "cpu0_irq_pct": 1.69,
+  "cpu0_softirq_pct": 0.12,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 15.29,
+   "vdd_in_min": 15.25,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ },
+ {
+  "arm": "d2_2",
+  "n": 2,
+  "agg_qps": 3120.11,
+  "per": [
+   {
+    "core": 0,
+    "qps": 1560.05,
+    "mean_ms": 0.639457
+   },
+   {
+    "core": 1,
+    "qps": 1560.06,
+    "mean_ms": 0.639776
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 20.7,
+  "cpu0_irq_pct": 2.27,
+  "cpu0_softirq_pct": 0.14,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 18.5,
+   "vdd_in_min": 18.43,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ },
+ {
+  "arm": "d8_1",
+  "n": 1,
+  "agg_qps": 627.55,
+  "per": [
+   {
+    "core": 0,
+    "qps": 627.548,
+    "mean_ms": 1.5921
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 7.9,
+  "cpu0_irq_pct": 0.69,
+  "cpu0_softirq_pct": 0.12,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 15.2,
+   "vdd_in_min": 15.17,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ },
+ {
+  "arm": "d8_2",
+  "n": 2,
+  "agg_qps": 1143.16,
+  "per": [
+   {
+    "core": 0,
+    "qps": 571.581,
+    "mean_ms": 1.7482
+   },
+   {
+    "core": 1,
+    "qps": 571.584,
+    "mean_ms": 1.74785
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 11.7,
+  "cpu0_irq_pct": 1.08,
+  "cpu0_softirq_pct": 0.14,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 20.35,
+   "vdd_in_min": 20.27,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ },
+ {
+  "arm": "d32_1",
+  "n": 1,
+  "agg_qps": 163.28,
+  "per": [
+   {
+    "core": 0,
+    "qps": 163.281,
+    "mean_ms": 6.12307
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 12.3,
+  "cpu0_irq_pct": 0.38,
+  "cpu0_softirq_pct": 0.12,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 14.72,
+   "vdd_in_min": 14.65,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ },
+ {
+  "arm": "d32_2",
+  "n": 2,
+  "agg_qps": 313.04,
+  "per": [
+   {
+    "core": 0,
+    "qps": 156.521,
+    "mean_ms": 6.38711
+   },
+   {
+    "core": 1,
+    "qps": 156.521,
+    "mean_ms": 6.38728
+   }
+  ],
+  "syncpt_irq_per_s": 0.0,
+  "syncpt_irq_cpu0_share": 0.0,
+  "irq_per_inference": 0.0,
+  "cpu0_busy_pct": 7.8,
+  "cpu0_irq_pct": 0.52,
+  "cpu0_softirq_pct": 0.14,
+  "clocks_power": {
+   "n": 42,
+   "vdd_in": 19.76,
+   "vdd_in_min": 19.71,
+   "dla0": 1228.8,
+   "dla0_min": 1228.8,
+   "dla1": 1228.8,
+   "dla1_min": 1228.8,
+   "emc": 3199.0,
+   "emc_min": 3199.0
+  }
+ }
+]

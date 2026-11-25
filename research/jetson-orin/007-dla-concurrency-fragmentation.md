@@ -5,7 +5,7 @@ L4T R39.2 / CUDA 13.2.
 **Software:** TensorRT **11.3.0.99** (`[b99]`), side-by-side in `~/dla-trt11`. The system
 TensorRT 10.16.2.10 reports `num_DLA_cores = 0` and cannot target DLA at all — see
 [003 §2](003-dla-transformer-offload.md).
-**Date:** 2026-11-24. **Status:** complete. Measurements in `selfmodel.db` run `eec630726c24`.
+**Date:** 2026-11-24 (§3b same day). **Status:** complete. Measurements in `selfmodel.db` run `eec630726c24`.
 
 ## Abstract
 
@@ -122,6 +122,58 @@ Energy per unit work improves with concurrency wherever concurrency buys through
 3% throughput, the rule is confirmed in both directions on the same hardware: concurrency lowers
 energy per unit work exactly while it still converts into throughput.
 
+## 3b. Isolated: a fixed ~0.21 ms per-submit serialization (2026-11-24)
+
+Finding 4 left 1.806x-vs-2.0x unexplained. It is now isolated, by varying DLA-resident work per
+submit while holding the submit count at exactly one (strict DLA, one fused `ForeignNode`). Two
+mechanisms predict opposite things: a **fixed per-submit cost** means the serialized share shrinks
+as the model deepens, so scaling must rise toward 2.0x; **proportional contention** in a shared
+datapath means scaling stays flat. Measurements in `selfmodel.db` run `9b15b7dfbaec`.
+
+| convs | 1 engine | 2 engines | scaling | implied serialized fraction | per-engine latency, 1 -> 2 | adder |
+|---|---|---|---|---|---|---|
+| 2 | 2242.90 qps (0.444 ms) | 3120.11 | **1.391x** | 0.438 | 0.4445 -> 0.6396 ms | +0.195 ms |
+| 8 | 627.55 qps (1.592 ms) | 1143.16 | **1.822x** | 0.098 | 1.5921 -> 1.7480 ms | +0.156 ms |
+| 32 | 163.28 qps (6.123 ms) | 313.04 | **1.917x** | 0.043 | 6.1231 -> 6.3872 ms | +0.264 ms |
+
+**Scaling rises monotonically with depth, so the cost is fixed per submit, not proportional.**
+Activating the second engine adds a flat **0.21 +- 0.05 ms** to every inference, whether that
+inference takes 0.44 ms or 6.12 ms — constant across a 13.8x range of inference time, which a
+proportional mechanism cannot produce. Fitting `S = 2/(1 + 0.205/T)` reproduces all three measured
+scalings within 3%. The depth-8 arm also replicates §3's 1.806x at 1.822x (0.9%).
+
+### Three mechanisms ruled out by measurement, not argument
+
+- **DVFS / power budget.** Both `dla0_core` and `dla1_core` held **1228.8 MHz = `max_rate`** in
+  every arm, with mean equal to minimum, and EMC held 3199 MHz. The module was in `MAXN_SUPER`.
+  Clock reduction cannot explain any part of the deficit.
+- **CPU-side interrupt servicing.** CPU0 never exceeded **20.7% busy** (irq <= 2.27%,
+  softirq <= 0.14%) in any arm. Moreover the `host1x_syncpt` interrupt counter showed **zero
+  delta** during every arm, so DLA completions do not arrive on that IRQ at all. A prior
+  hypothesis — that all DLA completions serialize on one `host1x_syncpt` IRQ pinned to CPU0,
+  which `/proc/interrupts` does show carrying 1.2M counts exclusively on CPU0 — is **refuted**:
+  that IRQ belongs to other host1x clients.
+- **DRAM bandwidth.** Already excluded in §3 at 4.6% of peak; the deepest model here moves even
+  less per unit time.
+
+### What remains
+
+A fixed serialized segment of ~0.21 ms per inference, inside the DLA submit/completion path,
+that is paid only when the second engine is active. It is not the clocks, not CPU interrupt
+servicing, and not memory bandwidth. Distinguishing the remaining candidates — a single driver
+submit lock, a shared firmware channel in the DLA falcon, or a shared internal SRAM/DMA
+arbitration step — needs driver-level tracing (`ftrace` on `nvhost`, or NVIDIA's own DLA
+profiling), which is not available from userspace here. **Named, bounded and quantified, but the
+specific shared resource is still not identified.**
+
+### Practical rule
+
+The second DLA engine is worth almost nothing on short inferences and almost everything on long
+ones: **1.39x at 0.44 ms, 1.92x at 6.12 ms.** Below roughly 2 ms of DLA-resident work per
+inference, the second engine returns less than half of what it costs in added latency. This, not
+TOPS, is the number to design around — and it compounds with §3's fragmentation result, since
+fallback both lengthens and multiplies submits.
+
 ## 4. Consequences
 
 - **For anyone offloading to DLA:** the headline number to optimise is not TOPS or precision, it
@@ -141,7 +193,7 @@ energy per unit work exactly while it still converts into throughput.
 - Fragmentation is a *correlate* measured across four engines, not a controlled sweep. The
   controlled part is `pure` vs `fallback` (one operator, everything else identical); the ResNet-18
   rows differ in many ways at once and only corroborate the ordering.
-- Finding 4's residual (1.806x vs 2.0x) is unexplained, and the candidate mechanisms are guesses.
+- Finding 4's residual is now isolated to a fixed ~0.21 ms per-submit serialization (§3b), with DVFS, CPU/IRQ servicing and bandwidth each excluded by measurement. The specific shared resource inside the submit path is still unidentified and needs driver-level tracing.
 - `conv_pure`/`conv_fallback` are synthetic. They were designed to remove bandwidth as a variable,
   which also makes them unrepresentative of real CNNs.
 - Power is module-level VDD_IN; carrier fan/BMC/switch excluded. `llama-server` stayed resident

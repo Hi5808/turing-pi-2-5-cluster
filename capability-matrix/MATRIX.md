@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 43 | 56% |
+| ✅ WORKS | 44 | 56% |
 | 🟡 PARTIAL | 10 | 13% |
 | ❌ FAILS | 10 | 13% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 12% |
-| **Total** | **77** | |
+| **Total** | **78** | |
 
 ## A compute
 
@@ -52,6 +52,7 @@
 | A31 | DLA concurrency limited by DRAM bandwidth | orin-nx-16g | 2 | ❌ FAILS | MEASURED | Fastest 2-engine arm (conv_pure, 1133.80 qps) uses 4.76 GB/s of 102.4 GB/s peak = 4.6%, counting weights plus all 9 activations |  |
 | A32 | One GPU-fallback op is cheap | orin-nx-16g | 2 | ❌ FAILS | MEASURED | Two identical 8x(Conv+ReLU) models differing by ONE elementwise add: 627.73 -> 535.52 qps single engine (-14.7%), +0.274 ms latency, and 2-engine scaling 1.806x -> 1.628x |  |
 | A33 | DLA 2-engine scaling predicted by engine fragmentation | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Monotonic across a 4.5x throughput range: 1 DLA node / 0 GPU ops = 1.806x; 1 node / 1 GPU op = 1.628x; ResNet-18 fp16 9 nodes = 1.601x; ResNet-18 INT8 16 nodes = 1.034x |  |
+| A34 | DLA 2nd-engine cost is a fixed per-submit serialization | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Scaling rises with work per submit: 1.391x / 1.822x / 1.917x at 2 / 8 / 32 convs (single-engine latency 0.44 / 1.59 / 6.12 ms). Activating engine 2 adds a flat 0.21 +- 0.05 ms per inference across a 13.8x latency range |  |
 
 ## B cluster
 
