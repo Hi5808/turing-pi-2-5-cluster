@@ -1,6 +1,6 @@
 # Turing Pi 2.5: operator's runbook
 
-Your one command: `~/turing-pi/ops/tp` (add `alias tp=~/turing-pi/ops/tp` to your shell profile). Run `tp help`.
+Your one command: `ops/tp` in this repo (add `alias tp=~/turing-pi-2-5-cluster/ops/tp` to your shell profile). Run `tp help`.
 
 ## The board in one paragraph
 
@@ -31,7 +31,7 @@ Four slots, one management chip (the BMC), one built-in network switch. Slot 1 =
 | "OFFLINE" | Node 1 lost Wi-Fi or its dongle | `tp wifi`. Unplug and replug the USB dongle, then `tp reboot 1`. |
 | Laptop can't reach anything | Cable unplugged or laptop link down | Replug the cable to the board; confirm the laptop interface is up. |
 | A node won't power on | BMC state | `tp power status`; `tp power on N`; `tp bmc 'tpi info'` to confirm the BMC answers. |
-| Jetson won't boot at all after some change | Firmware/config problem | Recovery procedure in the public repo `Hi5808/turing-pi-2.5-jetson-eeprom-fix` (scripts `tp-recovery.sh`, `qspi.sh restore`). Backups are in `~/turing-pi/jetson/qspi-backup-nx` and `qspi-backup-nano`. Stop and read the repo README first. |
+| Jetson won't boot at all after some change | Firmware/config problem | Recovery procedure in `jetson-eeprom-fix/` in this repo (scripts `tp-recovery.sh`, `qspi.sh restore`). Backups are in `~/turing-pi/jetson/qspi-backup-nx` and `qspi-backup-nano`. Stop and read the repo README first. |
 
 ## Never do these
 
@@ -45,9 +45,9 @@ Four slots, one management chip (the BMC), one built-in network switch. Slot 1 =
 
 | Thing | Location |
 |---|---|
-| This tool and runbook | `~/turing-pi/ops/` |
-| Research notebook (matrix, logs, results) | `~/turing-pi-capability-matrix` (private GitHub `Hi5808/turing-pi-2.5-capability-matrix`) |
-| Public recovery repo | `~/turing-pi-jetson-recovery` (`Hi5808/turing-pi-2.5-jetson-eeprom-fix`) |
+| This tool and runbook | `ops/` in this repo |
+| Research notebook (matrix, logs, results) | `capability-matrix/` in this repo (the standalone `Hi5808/turing-pi-2.5-capability-matrix` is archived) |
+| Public recovery repo | `jetson-eeprom-fix/` in this repo (the standalone `Hi5808/turing-pi-2.5-jetson-eeprom-fix` is archived) |
 | Firmware backups | `~/turing-pi/jetson/qspi-backup-nx`, `qspi-backup-nano` |
 | Node 1 data drive | `/mnt/nvme` on node 1 (models, NFS share `/mnt/nvme/share`) |
 | BMC | `root@10.43.0.10`, default password `turing` (change it if the board ever leaves your network) |
