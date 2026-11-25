@@ -1,0 +1,25 @@
+# Installed on node2 (orinnx) and node3 (orin1) as /etc/systemd/system/llama-server.service.
+# Substitute the user per node; the model path and binary live in that user's start_llama.sh,
+# so this unit is identical on both nodes apart from User= and the description.
+#
+#   sudo install -m 644 -o root -g root llama-server.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now llama-server
+#
+# NOTE: kill any hand-started llama-server FIRST. An orphan holding ~10 GB will make the unit
+# fail with "cudaMalloc failed: out of memory" -- it OOMs against the process it is replacing.
+[Unit]
+Description=llama-server (model staged on local NVMe)
+Documentation=https://github.com/Hi5808/turing-pi-2-5-cluster
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=CHANGEME
+ExecStart=/bin/bash /home/CHANGEME/start_llama.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
