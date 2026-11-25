@@ -69,11 +69,35 @@ a 931.5 GB NVMe as their *root* disk with ~930 GB free. They do not need node1's
 the shared mount exists so one copy of a model serves every node. That convenience is real, but
 it is paid for at 90.7 MB/s.
 
-**Finding 4 — the penalty is being paid in production right now.** `llama-server` on node2 loads
-`Qwen3-14B-Q4_K_M.gguf` (9 001 752 960 bytes = 8.38 GiB) from `/mnt/share`. At the measured
-90.7 MB/s that is **~99 s of model load**, against **~4.5 s** from its own NVMe at 2.0 GB/s. The
-fix is to stage models onto each node's local disk and keep the NFS copy as the distribution
-master — a one-line path change worth ~94 s on every cold start.
+**Finding 4 — the penalty was being paid in production, and has now been measured and fixed.**
+`llama-server` on node2 loaded `Qwen3-14B-Q4_K_M.gguf` (9 001 752 960 bytes = 8.38 GiB) from
+`/mnt/share`. Both models were staged onto their node's local NVMe and the cold-start load timed
+A/B, dropping caches (`vm.drop_caches=3`) before each arm so neither side was favoured, with
+readiness defined as HTTP 200 on `/health`:
+
+| Load path | Cold start to ready | Effective throughput |
+|---|---|---|
+| NFS `/mnt/share` over the carrier | **81.50 s** | 105 MB/s |
+| local NVMe `~/models` | **9.81 s** | 876 MB/s |
+| local NVMe, warm cache | 8.74 s | — |
+
+**8.3x faster, 71.7 s saved on every cold start.** Measurements in `selfmodel.db` run
+`3bb165041cfe`.
+
+Both predictions made earlier in this paper were wrong, in opposite directions, and the reasons
+are worth keeping:
+
+- **The NFS side was pessimistic.** 81.50 s implies 105 MB/s, *above* the 90.7 MB/s measured with
+  `dd iflag=direct` in §3. O_DIRECT defeats readahead, so the O_DIRECT figure understates buffered
+  sequential NFS reads by ~16%. The 22x ratio in Finding 3 is a ratio of O_DIRECT reads and should
+  not be read as a ratio of real load times.
+- **The local side was optimistic.** 9.81 s implies 876 MB/s against 2.0 GB/s of raw sequential
+  read — only 44% of what the disk can do, and warm cache saves just 1.1 s more. So local model
+  load is **not disk-bound**: mmap, tensor setup and CUDA init dominate. Predicting ~4.5 s from
+  disk speed alone was the wrong model of the problem.
+
+Real end-to-end gain is therefore **8.3x, not the ~22x** the storage benchmark suggested. The
+staged copies were verified by exact byte size and by generating from each endpoint.
 
 NFS also costs ~22% of the available wire: 90.7 MB/s is 726 Mbit/s against 937 Mbit/s measured by
 `iperf3` on the same path, so protocol overhead and not just the link is in play.

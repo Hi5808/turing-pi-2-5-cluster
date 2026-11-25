@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 45 | 53% |
+| ✅ WORKS | 46 | 53% |
 | 🟡 PARTIAL | 11 | 13% |
-| ❌ FAILS | 15 | 18% |
+| ❌ FAILS | 15 | 17% |
 | 🔌 NEEDS-HW | 5 | 6% |
-| ⬜ UNTESTED | 9 | 11% |
-| **Total** | **85** | |
+| ⬜ UNTESTED | 9 | 10% |
+| **Total** | **86** | |
 
 ## A compute
 
@@ -125,6 +125,7 @@
 | A39 | Internal switch reaches 1GbE line rate | any |  | ✅ WORKS | MEASURED | iperf3: node1->node2 937, node1->node3 936, node2->node3 941 Mbit/s receiver; full duplex node2<->node3 789+804=1593 Mbit/s aggregate; RTT 0.391-0.439 ms avg |  |
 | A40 | Shared NFS store is a performance win | any |  | ❌ FAILS | MEASURED | 90.7 MB/s read over the carrier switch (dd 2GiB O_DIRECT) vs 2.0 GB/s on node2's own NVMe and 1.9 GB/s on node3's = 22x penalty. NFS also costs ~22% of the wire (726 of 937 Mbit/s) |  |
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
+| A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
 
 ## G reliability
 
