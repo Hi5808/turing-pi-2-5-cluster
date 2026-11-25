@@ -292,8 +292,11 @@ Findings:
    work only, and must not be stated unqualified. Corrected here.
 2. **In INT8 the scaling collapses to 1.034x** (252.88 vs 244.57). INT8 makes one engine 1.93x
    faster (244.57 vs 126.70), which is enough to reach the shared ceiling by itself, so the second
-   engine adds 3%. The ceiling is ~253 qps and both precisions run into it: fp16 approaches it
-   with two engines, INT8 reaches it with one.
+   engine adds 3%. **The "shared ~253 qps ceiling" originally written here is RETRACTED** --
+   see [007](007-dla-concurrency-fragmentation.md): the same two engines reach 1133.8 qps on a
+   model that stays on the DLA, at 4.6% of DRAM peak. 252.88 qps was a property of this engine's
+   fragmentation (16 DLA nodes, 70 Quantize / 110 Dequantize), not of the hardware. The 1.034x
+   scaling stands; only the cause was misnamed.
 3. **The two engines are identical to 0.15%** (126.695 vs 126.502 qps). No core lottery.
 4. **The GPU still wins decisively, in both throughput and energy, even against DLA's best mode.**
    1360.3 qps vs 252.88 is 5.4x; 60.5 inf/J vs 18.25 is 3.3x. The DLA is marketed as the efficient
