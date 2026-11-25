@@ -21,7 +21,7 @@ The board holds a Turing RK1 (Rockchip RK3588 with a 6-TOPS NPU), a Jetson Orin 
 | [`logs/`](logs) | One file per experiment: question, setup, method, results, limits |
 | [`docs/PORT-MAP.md`](docs/PORT-MAP.md) | Which ports belong to which slot, what is verified, the rotation protocol |
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | Evidence levels and the rules every entry follows |
-| [`papers/`](papers) | Candidate papers built from the logs, and the template |
+| [`papers/`](papers) | The paper template and the rules drafts must follow; unpublished drafts are kept privately, not here |
 | [`scripts/`](scripts) | `render_matrix.py` and the benchmark scripts in `scripts/bench/` |
 | [`docs/PROJECT.md`](docs/PROJECT.md) | Charter and roadmap: what this is for |
 
