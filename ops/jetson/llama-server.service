@@ -37,7 +37,13 @@ TimeoutStartSec=300
 # Do NOT set KillSignal=SIGINT. It was tried and is WORSE: SIGINT hit the 15 s cap on a fresh
 # instance that SIGTERM stopped in 0.246 s.
 #
-# The reboot wall-clock saving (~75 s) is INFERRED from 90 s - 15 s, not measured end to end.
+# VERIFIED end to end by a second reboot (selfmodel.db run cc40cd8ca4a8): pre-Linux cost went
+# 199 s -> 123 s (76 s saved, matching the prediction), and time to a serving endpoint went
+# 214 s -> 141 s. The shutdown journal shows 'Stopping llama-server' 07:04:17 -> 'Stopped'
+# 07:04:32: exactly 15 s, result 'timeout', and 94% of ALL OS shutdown time (16 s total).
+#
+# What is left is not ours: 107 s of Tegra firmware/bootloader, 66% of the whole reboot. Do not
+# chase further OS-side shutdown tuning -- the floor is the firmware.
 TimeoutStopSec=15
 
 [Install]

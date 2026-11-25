@@ -9,11 +9,11 @@
 | Status | Rows | Share |
 |---|---:|---:|
 | ✅ WORKS | 47 | 53% |
-| 🟡 PARTIAL | 12 | 14% |
-| ❌ FAILS | 15 | 17% |
+| 🟡 PARTIAL | 11 | 12% |
+| ❌ FAILS | 17 | 19% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 10% |
-| **Total** | **88** | |
+| **Total** | **89** | |
 
 ## A compute
 
@@ -126,8 +126,9 @@
 | A40 | Shared NFS store is a performance win | any |  | ❌ FAILS | MEASURED | 90.7 MB/s read over the carrier switch (dd 2GiB O_DIRECT) vs 2.0 GB/s on node2's own NVMe and 1.9 GB/s on node3's = 22x penalty. NFS also costs ~22% of the wire (726 of 937 Mbit/s) |  |
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 | A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
-| A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted after 7d uptime: unit came back enabled+active with NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. 229 s reboot issued -> SSH back; llama-server active 15 s after kernel start, i.e. BEFORE SSH returned |  |
-| A44 | llama-server stops cleanly on SIGTERM | any |  | 🟡 PARTIAL | MEASURED | Aged instance (~7.5 h, 5.8 G peak, 314.9 M swap): SIGTERM did NOT stop it; ran to the 15 s cap and needed SIGKILL, result 'timeout'. Fresh instance, same signal, 180 s cap: deactivated successfully in 0.246 s |  |
+| A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted twice. Unit returns enabled+active, NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. Pre-Linux cost 199 s -> 123 s after TimeoutStopSec=15; time to service ready 214 s -> 141 s |  |
+| A44 | llama-server stops cleanly on SIGTERM | any |  | ❌ FAILS | MEASURED | Aged instance (~7.5 h, 5.8 G peak, 314.9 M swap): SIGTERM did NOT stop it; ran to the 15 s cap and needed SIGKILL, result 'timeout'. Fresh instance, same signal, 180 s cap: deactivated successfully in 0.246 s |  |
+| A45 | Reboot cost is dominated by the OS | orin-nano-8g | 3 | ❌ FAILS | MEASURED | Attributed from the persistent journal: OS shutdown 16 s, Tegra firmware/bootloader 107 s, Linux boot 33.0 s. Firmware alone is 66% of the 161 s between reboot command and a booted kernel+userspace |  |
 
 ## G reliability
 
