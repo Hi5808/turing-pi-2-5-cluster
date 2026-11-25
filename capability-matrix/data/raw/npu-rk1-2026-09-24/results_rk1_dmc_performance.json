@@ -1,0 +1,110 @@
+{
+  "TinyLlama-1.1B-plain-w8a8-maxctx16384": {
+    "trials": [
+      {
+        "wall_s": 8.516,
+        "eval_count": 99,
+        "eval_ms": 8155,
+        "decode_tok_s": 12.14,
+        "prompt_eval_count": 36,
+        "prompt_eval_ms": 146,
+        "prefill_tok_s": 246.58,
+        "done_reason": "stop",
+        "response_chars": 330,
+        "npu_temp_before_c": 49.923,
+        "npu_temp_after_c": 54.538,
+        "npu_temp_delta_c": 4.6,
+        "mem_used_mb_before": 2564,
+        "mem_used_mb_after": 2564
+      },
+      {
+        "wall_s": 8.732,
+        "eval_count": 99,
+        "eval_ms": 8220,
+        "decode_tok_s": 12.04,
+        "prompt_eval_count": 31,
+        "prompt_eval_ms": 130,
+        "prefill_tok_s": 238.46,
+        "done_reason": "stop",
+        "response_chars": 374,
+        "npu_temp_before_c": 51.769,
+        "npu_temp_after_c": 55.461,
+        "npu_temp_delta_c": 3.7,
+        "mem_used_mb_before": 2564,
+        "mem_used_mb_after": 2635
+      },
+      {
+        "wall_s": 9.305,
+        "eval_count": 99,
+        "eval_ms": 8960,
+        "decode_tok_s": 11.05,
+        "prompt_eval_count": 33,
+        "prompt_eval_ms": 145,
+        "prefill_tok_s": 227.59,
+        "done_reason": "stop",
+        "response_chars": 422,
+        "npu_temp_before_c": 52.692,
+        "npu_temp_after_c": 55.461,
+        "npu_temp_delta_c": 2.8,
+        "mem_used_mb_before": 2635,
+        "mem_used_mb_after": 2635
+      },
+      {
+        "wall_s": 9.259,
+        "eval_count": 99,
+        "eval_ms": 8914,
+        "decode_tok_s": 11.11,
+        "prompt_eval_count": 36,
+        "prompt_eval_ms": 145,
+        "prefill_tok_s": 248.28,
+        "done_reason": "stop",
+        "response_chars": 370,
+        "npu_temp_before_c": 52.692,
+        "npu_temp_after_c": 55.461,
+        "npu_temp_delta_c": 2.8,
+        "mem_used_mb_before": 2636,
+        "mem_used_mb_after": 2636
+      },
+      {
+        "wall_s": 9.27,
+        "eval_count": 99,
+        "eval_ms": 8923,
+        "decode_tok_s": 11.09,
+        "prompt_eval_count": 31,
+        "prompt_eval_ms": 134,
+        "prefill_tok_s": 231.34,
+        "done_reason": "stop",
+        "response_chars": 373,
+        "npu_temp_before_c": 52.692,
+        "npu_temp_after_c": 56.384,
+        "npu_temp_delta_c": 3.7,
+        "mem_used_mb_before": 2636,
+        "mem_used_mb_after": 2636
+      },
+      {
+        "wall_s": 9.174,
+        "eval_count": 99,
+        "eval_ms": 8817,
+        "decode_tok_s": 11.23,
+        "prompt_eval_count": 33,
+        "prompt_eval_ms": 146,
+        "prefill_tok_s": 226.03,
+        "done_reason": "stop",
+        "response_chars": 417,
+        "npu_temp_before_c": 52.692,
+        "npu_temp_after_c": 56.384,
+        "npu_temp_delta_c": 3.7,
+        "mem_used_mb_before": 2636,
+        "mem_used_mb_after": 2636
+      }
+    ],
+    "summary": {
+      "n_valid_trials": 6,
+      "decode_tok_s_mean": 11.44,
+      "decode_tok_s_stdev": 0.51,
+      "prefill_tok_s_mean": 236.38,
+      "npu_temp_max_delta_c": 4.6,
+      "mem_used_mb_at_load": 2564
+    }
+  }
+}

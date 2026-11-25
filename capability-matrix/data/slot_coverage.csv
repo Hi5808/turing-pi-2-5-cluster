@@ -1,0 +1,4 @@
+chip,slot,session,date,notes
+rk3588,1,S1,2026-09-24,"RK1 in slot 1 (HDMI, USB-A, mini-PCIe #1, M.2)"
+orin-nx-16g,2,S1,2026-09-24,"Orin NX in slot 2 (mini-PCIe #2, M.2)"
+orin-nano-8g,3,S1,2026-09-24,"Orin Nano in slot 3 (SATA x2, M.2)"

@@ -1,0 +1,14 @@
+=== rk1
+gpiochips: 6
+i2c: /dev/i2c-0 /dev/i2c-1 /dev/i2c-10 /dev/i2c-6 /dev/i2c-9 
+spi: 
+can: 
+uart: /dev/ttyS9 
+pwm: pwmchip0 
+adc/iio: iio:device0 iio_sysfs_trigger 
+i2c names:
+  i2c-0: rk3x-i2c
+  i2c-1: rk3x-i2c
+  i2c-10: fde50000.dp
+  i2c-6: rk3x-i2c
+  i2c-9: ddc

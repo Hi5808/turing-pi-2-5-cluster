@@ -1,0 +1,12 @@
+=== nx
+cores=8
+cpu threads=1 run1:     events per second:   871.17
+cpu threads=1 run2:     events per second:   869.74
+cpu threads=1 run3:     events per second:   871.06
+cpu threads=8 run1:     events per second:  6928.93
+cpu threads=8 run2:     events per second:  6930.94
+cpu threads=8 run3:     events per second:  6931.08
+mem threads=1 read 1M: 30720.00 MiB transferred (25944.63 MiB/sec)
+mem threads=1 write 1M: 30720.00 MiB transferred (15975.03 MiB/sec)
+mem threads=8 read 1M: 30720.00 MiB transferred (96750.69 MiB/sec)
+mem threads=8 write 1M: 30720.00 MiB transferred (58673.79 MiB/sec)

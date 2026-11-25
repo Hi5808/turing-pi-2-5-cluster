@@ -1,0 +1,17 @@
+=== nx
+gpiochips: 2
+gpiochip0 [tegra234-gpio] (164 lines)
+gpiochip1 [tegra234-gpio-aon] (32 lines)
+i2c: /dev/i2c-0 /dev/i2c-1 /dev/i2c-2 /dev/i2c-4 /dev/i2c-5 /dev/i2c-7 
+spi: /dev/spidev0.0 /dev/spidev0.1 /dev/spidev1.0 /dev/spidev1.1 
+can: can0 
+uart: /dev/ttyAMA0 /dev/ttyS0 /dev/ttyS1 /dev/ttyS2 /dev/ttyS3 /dev/ttyTHS1 /dev/ttyTHS2 
+pwm: pwmchip0 pwmchip1 pwmchip2 pwmchip3 pwmchip4 
+adc/iio: 
+i2c names:
+  i2c-0: 3160000.i2c
+  i2c-1: c240000.i2c
+  i2c-2: 3180000.i2c
+  i2c-4: Tegra BPMP I2C adapter
+  i2c-5: 31b0000.i2c
+  i2c-7: c250000.i2c

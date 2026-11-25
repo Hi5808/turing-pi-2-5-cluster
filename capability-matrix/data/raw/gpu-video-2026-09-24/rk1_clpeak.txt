@@ -1,0 +1,47 @@
+arm_release_ver: g13p0-01eac0, rk_so_ver: 3
+
+Platform: ARM Platform
+  Device: Mali-G610 r0p0
+    Driver version  : 3.0 (Linux ARM64)
+    Compute units   : 4
+    Clock frequency : 1000 MHz
+
+    Global memory bandwidth (GBPS)
+      float   : 19.34
+      float2  : 19.16
+      float4  : 19.50
+      float8  : 15.54
+      float16 : 9.28
+
+    Single-precision compute (GFLOPS)
+      float   : 435.55
+      float2  : 464.16
+      float4  : 459.26
+      float8  : 429.26
+      float16 : 404.82
+
+    Half-precision compute (GFLOPS)
+      half   : 435.99
+      half2  : 863.27
+      half4  : 896.64
+      half8  : 872.35
+      half16 : 832.92
+
+    No double precision support! Skipped
+
+    Integer compute (GIOPS)
+      int   : 123.30
+      int2  : 123.96
+      int4  : 123.36
+      int8  : 121.98
+      int16 : 122.40
+
+    Integer compute Fast 24bit (GIOPS)
+      int   : 123.43
+      int2  : 124.06
+      int4  : 123.45
+      int8  : 122.05
+      int16 : 122.42
+
+    Transfer bandwidth (GBPS)
+      enqueueWriteBuffer              : 
