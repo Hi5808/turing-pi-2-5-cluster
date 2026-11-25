@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 46 | 53% |
+| ✅ WORKS | 47 | 54% |
 | 🟡 PARTIAL | 11 | 13% |
 | ❌ FAILS | 15 | 17% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 10% |
-| **Total** | **86** | |
+| **Total** | **87** | |
 
 ## A compute
 
@@ -126,6 +126,7 @@
 | A40 | Shared NFS store is a performance win | any |  | ❌ FAILS | MEASURED | 90.7 MB/s read over the carrier switch (dd 2GiB O_DIRECT) vs 2.0 GB/s on node2's own NVMe and 1.9 GB/s on node3's = 22x penalty. NFS also costs ~22% of the wire (726 of 937 Mbit/s) |  |
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 | A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
+| A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted after 7d uptime: unit came back enabled+active with NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. 229 s reboot issued -> SSH back; llama-server active 15 s after kernel start, i.e. BEFORE SSH returned |  |
 
 ## G reliability
 

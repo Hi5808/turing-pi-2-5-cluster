@@ -5,6 +5,11 @@
 #   sudo install -m 644 -o root -g root llama-server.service /etc/systemd/system/
 #   sudo systemctl daemon-reload && sudo systemctl enable --now llama-server
 #
+# VERIFIED on node3 2026-11-24: after a reboot the unit came back enabled+active with
+# NRestarts=0, health 200, still serving the locally staged model, no intervention. It was
+# serving 15 s after kernel start -- before SSH accepted connections again. A full reboot costs
+# ~229 s on a Jetson here, but 87% of that is shutdown + Tegra firmware, not Linux (30.6 s).
+#
 # NOTE: kill any hand-started llama-server FIRST. An orphan holding ~10 GB will make the unit
 # fail with "cudaMalloc failed: out of memory" -- it OOMs against the process it is replacing.
 [Unit]
