@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 44 | 56% |
-| 🟡 PARTIAL | 10 | 13% |
-| ❌ FAILS | 10 | 13% |
+| ✅ WORKS | 44 | 54% |
+| 🟡 PARTIAL | 11 | 13% |
+| ❌ FAILS | 13 | 16% |
 | 🔌 NEEDS-HW | 5 | 6% |
-| ⬜ UNTESTED | 9 | 12% |
-| **Total** | **78** | |
+| ⬜ UNTESTED | 9 | 11% |
+| **Total** | **82** | |
 
 ## A compute
 
@@ -53,6 +53,10 @@
 | A32 | One GPU-fallback op is cheap | orin-nx-16g | 2 | ❌ FAILS | MEASURED | Two identical 8x(Conv+ReLU) models differing by ONE elementwise add: 627.73 -> 535.52 qps single engine (-14.7%), +0.274 ms latency, and 2-engine scaling 1.806x -> 1.628x |  |
 | A33 | DLA 2-engine scaling predicted by engine fragmentation | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Monotonic across a 4.5x throughput range: 1 DLA node / 0 GPU ops = 1.806x; 1 node / 1 GPU op = 1.628x; ResNet-18 fp16 9 nodes = 1.601x; ResNet-18 INT8 16 nodes = 1.034x |  |
 | A34 | DLA 2nd-engine cost is a fixed per-submit serialization | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Scaling rises with work per submit: 1.391x / 1.822x / 1.917x at 2 / 8 / 32 convs (single-engine latency 0.44 / 1.59 / 6.12 ms). Activating engine 2 adds a flat 0.21 +- 0.05 ms per inference across a 13.8x latency range |  |
+| A35 | Serve concurrent users at readable latency | any |  | 🟡 PARTIAL | MEASURED | Knee = 4 concurrent streams (p95 ITL<=200ms and every stream >=5 tok/s). 16 slots exist but 8 streams already breaks SLO (slowest 4.06 tok/s, ITL p95 231ms). Peak 61.29 tok/s at 32 streams needs 41.5s TTFT |  |
+| A36 | Aggregate tok/s detects serving failure | any |  | ❌ FAILS | MEASURED | Past the 16-slot limit ITL p95 stays FLAT (417/419/418 ms) while TTFT p95 goes 980ms -> 41.3s -> 41.5s and the slowest stream falls to 0.19 tok/s, all while aggregate reads a healthy 61 tok/s |  |
+| A37 | Efficiency optimum is a shippable operating point | any |  | ❌ FAILS | MEASURED | tok/J peaks at 1.536 (32 streams) where TTFT p95 is 41.5s; the SLO-respecting knee runs at 0.936 tok/J. Serving users costs 1.64x the energy per token of benchmarking |  |
+| A38 | Round-robin is fair across heterogeneous nodes | any |  | ❌ FAILS | MEASURED | Nano/4B plateaus 43.4 tok/s vs NX/14B 17.9 tok/s, so the same service hands one user 7.1 tok/s and the next 17.0. The smaller module carries 2.42x the throughput |  |
 
 ## B cluster
 
