@@ -30,9 +30,15 @@ TimeoutStartSec=300
 # ("result 'timeout'"). With systemd's DEFAULT 90 s, this one service stalls shutdown for 90 s
 # every reboot, which is most of the ~199 s pre-Linux cost in A43.
 #
-# Conditional, and n=1 for the stall: a FRESHLY started instance exits cleanly on SIGTERM in
-# 0.246 s. So the stall comes from accumulated state (swap/KV/slots), not from the signal, and
-# the exact trigger is not isolated.
+# The trigger is an IN-FLIGHT STREAMING REQUEST, not instance age. Measured: idle 0.49 s,
+# one completed request 0.24 s, 24 completed requests 0.24 s -- but a stream in flight stalls.
+# ("Accumulated state" was my earlier guess and is wrong; the aged instances were stalling
+# because the dashboard streams to them continuously.)
+#
+# An in-flight stream is NECESSARY but NOT SUFFICIENT, and it is NOT a build regression: a
+# same-node A/B inverted the cross-node result, and stall length varies 30 s to >120 s, which
+# looks like a race. Unseparated: --parallel, -c, model speed, bind address, and whether the
+# signal arrives from systemd's cgroup or a direct kill.
 #
 # Do NOT set KillSignal=SIGINT. It was tried and is WORSE: SIGINT hit the 15 s cap on a fresh
 # instance that SIGTERM stopped in 0.246 s.
