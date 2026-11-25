@@ -84,9 +84,14 @@ will not even compile. Capability map, concurrency table and the corrections are
 node1's 3-core RK3588 NPU — recorded in earlier notes as having no userland, which was wrong — is
 **2.0x faster than node1's own CPU at prefill** (219.9 vs 110.7 t/s) and **1.7x slower at decode**
 (9.67 vs 16.11 t/s), with all three cores evenly loaded at ~62% and none saturated. Same
-fixed-function signature as the DLA, opposite prefill outcome. This reopens project 001's claim
-that node1 can only orchestrate: it cannot be a *decode* stage, but a prefill stage is not ruled
-out. [research/004](research/004-rk3588-npu-llm.md).
+fixed-function signature as the DLA, opposite prefill outcome. That win over its own CPU does not
+make node1 an inference stage: an Orin prefills ~10x faster still (1966.8 t/s against the NPU's
+219.9), and node1's 31 GB cannot hold a 32B model's w8a8 weights, so there is no prompt length at
+which routing prefill away from the node that will decode pays off. Project 001's constraint that
+node1 only orchestrates stands — for capacity and engine speed, not the weak-CPU reason 001 gave.
+The transfer cost 004 had named as the decider turned out to be affordable (105.1 MB/s backplane,
+~18% of prefill) and was the wrong thing to bet on.
+[research/004](research/004-rk3588-npu-llm.md).
 
 ## Method
 
