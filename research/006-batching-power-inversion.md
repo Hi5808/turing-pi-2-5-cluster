@@ -149,7 +149,13 @@ disproportionately outside the compute rail.
 - **c2 is the local power maximum and we did not sweep 3–7 streams**, so the exact location of the
   peak and the shape of the curve between c2 and c8 are unmeasured.
 - node1 (RK3588) is absent from this study: the RK1 module exposes no INA3221 rails, so its energy
-  is unmeasured rather than zero. The board BMC is the only route and needs credentials.
+  is unmeasured rather than zero. This is now a measured dead end rather than an open task — the
+  BMC has **no power-sensing hardware at all** (only an EEPROM, an RTC and the Ethernet switch on
+  its i2c bus), so closing it needs an external meter. See
+  [capability-matrix/logs/2026-11-24_bmc-power-telemetry.md](../capability-matrix/logs/2026-11-24_bmc-power-telemetry.md).
+- Everything here is *module* power. The carrier's own overhead — fan, BMC, Ethernet switch — and
+  the regulator losses between the board input and each module are outside every rail used here,
+  so the tokens-per-joule figures are module-level and exclude board overhead.
 
 ## Adjacent open question: the silent batching loss
 

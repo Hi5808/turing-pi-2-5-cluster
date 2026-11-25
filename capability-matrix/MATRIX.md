@@ -11,8 +11,8 @@
 | ✅ WORKS | 40 | 59% |
 | 🟡 PARTIAL | 9 | 13% |
 | ❌ FAILS | 5 | 7% |
-| 🔌 NEEDS-HW | 4 | 6% |
-| ⬜ UNTESTED | 10 | 15% |
+| 🔌 NEEDS-HW | 5 | 7% |
+| ⬜ UNTESTED | 9 | 13% |
 | **Total** | **68** | |
 
 ## A compute
@@ -36,7 +36,7 @@
 | A15 | DLA offload | orin-nano-8g | 3 | ❌ FAILS | MEASURED | TensorRT: DLA core 0 not available (expected) | [2026-09-24_tensorrt-dla-orin](logs/2026-09-24_tensorrt-dla-orin.md) |
 | A16 | Energy per token (power rails) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 0.514 J/token total (22.4 W busy, 43.6 t/s), 0.372 net of idle; Qwen3-1.7B Q4_K_M | [2026-09-24_jetson-energy-per-token](logs/2026-09-24_jetson-energy-per-token.md) |
 | A17 | Energy per token (power rails) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 0.512 J/token total (20.2 W busy, 39.5 t/s), 0.331 net of idle; Qwen3-1.7B Q4_K_M | [2026-09-24_jetson-energy-per-token](logs/2026-09-24_jetson-energy-per-token.md) |
-| A18 | Energy per token (external meter) | rk3588 | 1 | ⬜ UNTESTED | PLANNED |  |  |
+| A18 | Energy per token (external meter) | rk3588 | 1 | 🔌 NEEDS-HW | MEASURED | BMC exposes NO power sensing: i2c bus holds only a 24c02 EEPROM, a pcf8563 RTC and the rtl8365mb switch; no hwmon/iio/ADC; API type=power returns on/off state only | [2026-11-24_bmc-power-telemetry](logs/2026-11-24_bmc-power-telemetry.md) |
 | A19 | NPU decode vs NPU clock (300-1000 MHz sweep) | rk3588 | 1 | ✅ WORKS | MEASURED | 10.45 t/s at 300 MHz; 11.3-11.6 t/s from 400 to 1000 MHz | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A20 | DRAM controller clock effect on NPU decode | rk3588 | 1 | ✅ WORKS | MEASURED | 1068 -> 2112 MHz: 11.2 -> 11.4 t/s (within noise) | [2026-09-24_llm-decode-cross-chip-and-rk1-npu](logs/2026-09-24_llm-decode-cross-chip-and-rk1-npu.md) |
 | A21 | CPU throughput (sysbench, 1 thread / all threads) | rk3588 | 1 | ✅ WORKS | MEASURED | 938 / 5113 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
