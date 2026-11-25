@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 40 | 59% |
+| ✅ WORKS | 41 | 59% |
 | 🟡 PARTIAL | 9 | 13% |
-| ❌ FAILS | 5 | 7% |
+| ❌ FAILS | 6 | 9% |
 | 🔌 NEEDS-HW | 5 | 7% |
 | ⬜ UNTESTED | 9 | 13% |
-| **Total** | **68** | |
+| **Total** | **70** | |
 
 ## A compute
 
@@ -43,6 +43,8 @@
 | A22 | CPU throughput (sysbench, 1 thread / all threads) | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 871 / 6931 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 | A23 | CPU throughput (sysbench, 1 thread / all threads) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 759 / 4472 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 | A24 | CPU memory read bandwidth, all threads (sysbench) | mixed |  | ✅ WORKS | MEASURED | NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s) | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
+| A25 | Concurrent inference contexts (2+) | rk3588 | 1 | ❌ FAILS | MEASURED | Mali G610: 1 Vulkan context works (decode 9.08 tok/s, Qwen3-0.6B Q4_K_M); a 2nd concurrent context aborts ALL processes with vk::DeviceLostError (waitForFences ErrorDeviceLost) in libggml-vulkan. Not the ~1.2GiB ceiling: 2x378MiB |  |
+| A26 | Concurrency beats width at equal resources | rk3588 | 1 | ✅ WORKS | MEASURED | node1 CPU, total thread budget fixed at 8: aggregate decode 35.07 / 53.24 / 57.62 tok/s at 1 / 2 / 3 processes (-t 8/4/2). 3 narrow inferences beat 1 wide one by 1.64x; prefill 94.01 -> 152.35 (1.62x) |  |
 
 ## B cluster
 
