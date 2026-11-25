@@ -38,3 +38,25 @@ GPU clock during the busy phase was about 1157 MHz on the NX (98% utilisation).
 ## Reproduction
 
 `tegrastats` output and the `llama-bench` command are in Setup; the parsing is a mean over `VDD_IN` fields.
+
+---
+
+## Follow-up (2026-11-24)
+
+[research/006](../../research/006-batching-power-inversion.md) remeasured energy on these two
+modules across concurrency levels and **supersedes finding 1 above**, though it does not refute
+this log's measurement.
+
+Finding 1 here — "the two Orins spend about the same energy per token" — holds only at a single
+stream, which is the only condition this log tested. At one stream 006 agrees within 8.6%
+(0.846 vs 0.919 tok/J on Qwen3-4B). At eight concurrent streams the modules diverge along two
+different axes: the NX gives +17.7% throughput while the Nano is +7.4% more efficient. There is
+no single "more efficient module", only a routing rule.
+
+006 also found that total module power *falls* as concurrency rises (2 -> 8 streams: -4.51 W on
+the NX for +41.2% tokens), which no single-stream measurement can see.
+
+This log's method stands up well in one respect worth noting: gating on GPU utilisation >= 50%
+avoided the idle contamination that invalidated a later November run, where the telemetry window
+outlasted the benchmark inside it and produced figures that were ~93% idle.
+

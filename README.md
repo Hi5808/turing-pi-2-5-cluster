@@ -42,6 +42,28 @@ story entirely, where the limit is encoder count, not bandwidth.
 - [runbooks/k3s-clean-slate.md](runbooks/k3s-clean-slate.md) — reproducible teardown/rebuild
 - [runbooks/pipeline-parallel-llm.md](runbooks/pipeline-parallel-llm.md) — run a model split across the Jetsons
 - [research/](research/) — numbered research log, newest last
+- [capability-matrix/](capability-matrix/) — the evidence-graded capability map: feature x chip x slot, with 17 dated logs, raw results and draft papers
+- [jetson-eeprom-fix/](jetson-eeprom-fix/) — QSPI/EEPROM recovery tooling for a Jetson that will not boot on this carrier
+
+## One repo
+
+All research on this board lives here. Two previously separate repositories were merged in with
+their full history on 2026-11-24:
+
+| Was | Now | Contents |
+|---|---|---|
+| `turing-pi-2.5-capability-matrix` | [`capability-matrix/`](capability-matrix/) | 17 dated measurement logs, raw data, bench scripts, 5 draft papers, and `MATRIX.md` generated from `data/capabilities.csv` |
+| `turing-pi-2.5-jetson-eeprom-fix` | [`jetson-eeprom-fix/`](jetson-eeprom-fix/) | EEPROM fix, QSPI-only recovery and USB-park scripts, with host notes |
+
+Both keep their original directory structure rather than being flattened into `research/`, because
+each has internal relative links and a generator script that reads its own `data/` paths. Their
+commits are reachable in this repository's history under their original paths; the source repos
+are archived read-only so existing links still resolve.
+
+The split had a cost worth recording: `capability-matrix/logs/2026-09-24_jetson-energy-per-token.md`
+measured energy per token in September and [research/006](research/006-batching-power-inversion.md)
+revisited it in November, and the two sat in different repositories without either referencing the
+other. They are now cross-linked in both directions.
 
 ## Results so far
 

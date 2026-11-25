@@ -18,6 +18,14 @@ energy. These measurements say the dominant cost at low concurrency is a **fixed
 overhead**, so on a power- or thermally-limited device the correct move is the opposite: queue the
 work up and run it batched. Batching is an efficiency lever, not only a throughput lever.
 
+## Relation to the September measurement
+
+`capability-matrix/logs/2026-09-24_jetson-energy-per-token.md` measured 0.514 and 0.512 J/token on
+these same two modules in September and concluded that they "spend about the same energy per
+token". That is consistent with the c1 row below (0.846 vs 0.919 tok/J, 8.6% apart) and was not
+wrong — it was single-stream only, which is the one condition where the modules do look alike.
+This study varies the dimension that log held fixed.
+
 ## Correction to previously recorded figures
 
 An earlier pass recorded 2.261 tok/J (node2) and 2.270 tok/J (node3) with the conclusion that
