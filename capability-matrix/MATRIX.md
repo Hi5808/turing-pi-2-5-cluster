@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 47 | 54% |
-| 🟡 PARTIAL | 11 | 13% |
+| ✅ WORKS | 47 | 53% |
+| 🟡 PARTIAL | 12 | 14% |
 | ❌ FAILS | 15 | 17% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 10% |
-| **Total** | **87** | |
+| **Total** | **88** | |
 
 ## A compute
 
@@ -127,6 +127,7 @@
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 | A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
 | A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted after 7d uptime: unit came back enabled+active with NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. 229 s reboot issued -> SSH back; llama-server active 15 s after kernel start, i.e. BEFORE SSH returned |  |
+| A44 | llama-server stops cleanly on SIGTERM | any |  | 🟡 PARTIAL | MEASURED | Aged instance (~7.5 h, 5.8 G peak, 314.9 M swap): SIGTERM did NOT stop it; ran to the 15 s cap and needed SIGKILL, result 'timeout'. Fresh instance, same signal, 180 s cap: deactivated successfully in 0.246 s |  |
 
 ## G reliability
 

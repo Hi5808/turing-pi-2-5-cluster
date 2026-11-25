@@ -25,10 +25,19 @@ ExecStart=/bin/bash /home/CHANGEME/start_llama.sh
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=300
-# Cap shutdown. llama-server holds a large CUDA allocation and systemd's default 90 s stop
-# timeout is a candidate for part of the ~199 s pre-Linux reboot cost measured in A43. With
-# persistent journald (journald-persistent.conf) the next reboot's shutdown log will show
-# whether this actually helps -- UNVERIFIED as of 2026-11-24.
+# Cap shutdown. CONFIRMED by timing `systemctl stop` (selfmodel.db run 8b8a7eb57d8b): a
+# long-running instance does NOT stop on SIGTERM -- it ran to this cap and needed SIGKILL
+# ("result 'timeout'"). With systemd's DEFAULT 90 s, this one service stalls shutdown for 90 s
+# every reboot, which is most of the ~199 s pre-Linux cost in A43.
+#
+# Conditional, and n=1 for the stall: a FRESHLY started instance exits cleanly on SIGTERM in
+# 0.246 s. So the stall comes from accumulated state (swap/KV/slots), not from the signal, and
+# the exact trigger is not isolated.
+#
+# Do NOT set KillSignal=SIGINT. It was tried and is WORSE: SIGINT hit the 15 s cap on a fresh
+# instance that SIGTERM stopped in 0.246 s.
+#
+# The reboot wall-clock saving (~75 s) is INFERRED from 90 s - 15 s, not measured end to end.
 TimeoutStopSec=15
 
 [Install]
