@@ -41,7 +41,7 @@ earlier, evidenced by a `tailscaled.state.<oldname>.bak` file.
 
 ## 2. Interconnect baseline
 
-Full numbers and method in [../docs/MEASUREMENTS.md](../docs/MEASUREMENTS.md). Summary:
+Full numbers and method in [../docs/MEASUREMENTS.md](../../docs/MEASUREMENTS.md). Summary:
 951 Mb/s node->node1 on both Jetsons, 941 Mb/s node2<->node3 peer-to-peer, local NVMe
 1700–2000 MB/s. The switch is non-blocking pairwise; node1's single port is the bottleneck.
 
@@ -65,7 +65,7 @@ before starting, then retries on failure. **Verified across a reboot:** node3 ca
 ## 4. Clean-slate rebuild
 
 The cluster was torn down and rebuilt from a verified backup; procedure in
-[../runbooks/k3s-clean-slate.md](../runbooks/k3s-clean-slate.md). Restoration was from the
+[../runbooks/k3s-clean-slate.md](../../runbooks/k3s-clean-slate.md). Restoration was from the
 exported manifests, not the datastore — the datastore copy is a rollback artifact only, since
 replaying it would carry over the state the rebuild exists to discard.
 

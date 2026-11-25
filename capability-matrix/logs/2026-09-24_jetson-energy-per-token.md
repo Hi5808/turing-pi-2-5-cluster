@@ -43,7 +43,7 @@ GPU clock during the busy phase was about 1157 MHz on the NX (98% utilisation).
 
 ## Follow-up (2026-11-24)
 
-[research/006](../../research/006-batching-power-inversion.md) remeasured energy on these two
+[research/006](../../research/jetson-orin/006-batching-power-inversion.md) remeasured energy on these two
 modules across concurrency levels and **supersedes finding 1 above**, though it does not refute
 this log's measurement.
 

@@ -152,7 +152,7 @@ disproportionately outside the compute rail.
   is unmeasured rather than zero. This is now a measured dead end rather than an open task — the
   BMC has **no power-sensing hardware at all** (only an EEPROM, an RTC and the Ethernet switch on
   its i2c bus), so closing it needs an external meter. See
-  [capability-matrix/logs/2026-11-24_bmc-power-telemetry.md](../capability-matrix/logs/2026-11-24_bmc-power-telemetry.md).
+  [capability-matrix/logs/2026-11-24_bmc-power-telemetry.md](../../capability-matrix/logs/2026-11-24_bmc-power-telemetry.md).
 - Everything here is *module* power. The carrier's own overhead — fan, BMC, Ethernet switch — and
   the regulator losses between the board input and each module are outside every rail used here,
   so the tokens-per-joule figures are module-level and exclude board overhead.

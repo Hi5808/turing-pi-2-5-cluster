@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 41 | 59% |
-| 🟡 PARTIAL | 9 | 13% |
-| ❌ FAILS | 6 | 9% |
+| ✅ WORKS | 42 | 57% |
+| 🟡 PARTIAL | 10 | 14% |
+| ❌ FAILS | 8 | 11% |
 | 🔌 NEEDS-HW | 5 | 7% |
-| ⬜ UNTESTED | 9 | 13% |
-| **Total** | **70** | |
+| ⬜ UNTESTED | 9 | 12% |
+| **Total** | **74** | |
 
 ## A compute
 
@@ -45,6 +45,10 @@
 | A24 | CPU memory read bandwidth, all threads (sysbench) | mixed |  | ✅ WORKS | MEASURED | NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s) | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 | A25 | Concurrent inference contexts (2+) | rk3588 | 1 | ❌ FAILS | MEASURED | Mali G610: 1 Vulkan context works (decode 9.08 tok/s, Qwen3-0.6B Q4_K_M); a 2nd concurrent context aborts ALL processes with vk::DeviceLostError (waitForFences ErrorDeviceLost) in libggml-vulkan. Not the ~1.2GiB ceiling: 2x378MiB |  |
 | A26 | Concurrency beats width at equal resources | rk3588 | 1 | ✅ WORKS | MEASURED | node1 CPU, total thread budget fixed at 8: aggregate decode 35.07 / 53.24 / 57.62 tok/s at 1 / 2 / 3 processes (-t 8/4/2). 3 narrow inferences beat 1 wide one by 1.64x; prefill 94.01 -> 152.35 (1.62x) |  |
+| A27 | Two DLA engines scale with each other | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | ResNet-18 b1 fp16: 126.70 -> 202.89 qps aggregate on 1 -> 2 engines (1.601x). INT8: 244.57 -> 252.88 qps (1.034x). Shared ceiling ~253 qps |  |
+| A28 | DLA INT8 faster than fp16 | orin-nx-16g | 2 | ✅ WORKS | MEASURED | ResNet-18 b1, 1 engine: 244.57 qps / 4.09 ms INT8 vs 126.70 qps / 7.89 ms fp16 = 1.93x; power 13.40 W vs 15.05 W |  |
+| A29 | DLA adds capacity alongside a busy GPU | orin-nx-16g | 2 | ❌ FAILS | MEASURED | llama-server Qwen3-14B Q4_K_M 4 streams: 17.07 tok/s alone -> 9.39 tok/s (-45%) with both DLA engines, while DLA falls 202.89 -> 79.64 qps (-61%). Fractions sum to 0.943 (fp16) and 0.738 (INT8) |  |
+| A30 | DLA beats the GPU on energy per inference | orin-nx-16g | 2 | ❌ FAILS | MEASURED | ResNet-18 b1: GPU 1360.3 qps at 22.47 W = 60.5 inf/J; best DLA (INT8, 1 engine) 244.57 qps at 13.40 W = 18.25 inf/J. GPU 5.4x throughput and 3.3x efficiency |  |
 
 ## B cluster
 

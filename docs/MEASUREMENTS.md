@@ -65,7 +65,7 @@ holds the strongest transcode engine in the chassis.
 
 ## Pipeline-parallel LLM inference, 2026-11-18
 
-Full method and findings in [../research/002](../research/002-pipeline-parallel-measurements.md).
+Full method and findings in [../research/002](../research/cluster/002-pipeline-parallel-measurements.md).
 
 ### Single-node decode (same model, Qwen3-4B Q4_K_M)
 
@@ -113,7 +113,7 @@ per token against the MoE's ~1.4 GiB, so dense benefits more per stream added.
 
 ## DLA vs GPU, transformer components at decode shapes (node2, Orin NX)
 
-TensorRT 11.3.0.99 b99, 200 iterations, median GPU-compute ms. Full method: research/003.
+TensorRT 11.3.0.99 b99, 200 iterations, median GPU-compute ms. Full method: [research/jetson-orin/003](../research/jetson-orin/003-dla-transformer-offload.md).
 
 | Component | DLA (ms) | GPU (ms) | DLA penalty |
 |---|---|---|---|

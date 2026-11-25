@@ -41,7 +41,8 @@ story entirely, where the limit is encoder count, not bandwidth.
 - [docs/STORAGE.md](docs/STORAGE.md) — ledger of large artifacts on the cluster
 - [runbooks/k3s-clean-slate.md](runbooks/k3s-clean-slate.md) — reproducible teardown/rebuild
 - [runbooks/pipeline-parallel-llm.md](runbooks/pipeline-parallel-llm.md) — run a model split across the Jetsons
-- [research/](research/) — numbered research log, newest last
+- [research/](research/) — research papers, filed by the hardware the claim is about:
+  [jetson-orin/](research/jetson-orin/), [rk3588/](research/rk3588/), [cluster/](research/cluster/)
 - [capability-matrix/](capability-matrix/) — the evidence-graded capability map: feature x chip x slot, with 17 dated logs, raw results and draft papers
 - [jetson-eeprom-fix/](jetson-eeprom-fix/) — QSPI/EEPROM recovery tooling for a Jetson that will not boot on this carrier
 
@@ -61,7 +62,7 @@ commits are reachable in this repository's history under their original paths; t
 are archived read-only so existing links still resolve.
 
 The split had a cost worth recording: `capability-matrix/logs/2026-09-24_jetson-energy-per-token.md`
-measured energy per token in September and [research/006](research/006-batching-power-inversion.md)
+measured energy per token in September and [research/006](research/jetson-orin/006-batching-power-inversion.md)
 revisited it in November, and the two sat in different repositories without either referencing the
 other. They are now cross-linked in both directions.
 
@@ -70,7 +71,7 @@ other. They are now cross-linked in both directions.
 A 32.76B-parameter dense model (Qwen3-32B Q3_K_M, 14.87 GiB) runs at 2.46 t/s split across an Orin NX
 and an Orin Nano, having failed to load on either node individually. Aggregate throughput reaches
 5.85 t/s decode at 4 concurrent streams. Details and the measurements that contradicted our
-assumptions are in [research/002](research/002-pipeline-parallel-measurements.md).
+assumptions are in [research/002](research/cluster/002-pipeline-parallel-measurements.md).
 
 The Orin NX's two DLA engines compile more of a transformer block than NVIDIA's own layer table
 documents — RMSNorm, Softmax and the full attention core all build with GPU fallback *disabled* —
@@ -79,7 +80,7 @@ Follow-up measurement killed the consolation prize too: the GPU alone already us
 module's 102 GB/s**, so DLA+GPU is 13% *slower* than the GPU by itself and the two DLA engines are
 slower together than one — the DLA is not an additive second compute stream. At prefill shapes it
 will not even compile. Capability map, concurrency table and the corrections are in
-[research/003](research/003-dla-transformer-offload.md).
+[research/003](research/jetson-orin/003-dla-transformer-offload.md).
 
 node1's 3-core RK3588 NPU — recorded in earlier notes as having no userland, which was wrong — is
 **2.0x faster than node1's own CPU at prefill** (219.9 vs 110.7 t/s) and **1.7x slower at decode**
@@ -91,7 +92,7 @@ which routing prefill away from the node that will decode pays off. Project 001'
 node1 only orchestrates stands — for capacity and engine speed, not the weak-CPU reason 001 gave.
 The transfer cost 004 had named as the decider turned out to be affordable (105.1 MB/s backplane,
 ~18% of prefill) and was the wrong thing to bet on.
-[research/004](research/004-rk3588-npu-llm.md).
+[research/004](research/rk3588/004-rk3588-npu-llm.md).
 
 ## Method
 

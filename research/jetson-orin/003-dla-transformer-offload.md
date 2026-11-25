@@ -6,7 +6,7 @@ CUDA 13.2.
 `[b99]`) in `~/dla-trt11/TensorRT-11.3.0.99`.
 **Model dimensions:** Qwen3-32B, read from the GGUF header: 64 layers, hidden 5120, FFN 25600,
 64 heads, 8 KV heads, head_dim 128.
-**Date:** 2026-11-18. **Status:** complete. **Verdict: do not build a ggml DLA backend for decode.**
+**Date:** 2026-11-18, extended 2026-11-24 (section 6c). **Status:** complete. **Verdict: do not build a ggml DLA backend for decode.**
 
 ## Abstract
 
@@ -266,12 +266,109 @@ But two of the reasons originally given for it were wrong: concurrency was prese
 DLA's redeeming use and is not available, and prefill was dismissed as unable to change the
 verdict when in fact it strengthens it. The conclusion was right for reasons that were not.
 
+## 6c. Precision is the knob that decides whether the two DLA engines scale (2026-11-24)
+
+§8 asked: *is any workload additive across the DLA engines, given that every workload measured in
+§6b was bandwidth-bound?* It is, and the answer turns out to be controlled by **precision**, not
+by the workload alone. ResNet-18, batch 1, 60 s per arm, both engines loading the same engine
+file, module otherwise quiet (idle 7.9-8.4 W; `llama-server` resident but serving nothing,
+GPU load 0). All rows in `selfmodel.db` run `f53f530c4292`, including the voided contaminated figure.
+
+| Arm | Agg qps | Per-engine | mean ms | VDD_IN | inf/J |
+|---|---|---|---|---|---|
+| GPU, fp16 | **1360.3** | — | 0.734 | 22.47 W | **60.5** |
+| DLA0, fp16 | 126.70 | 126.70 | 7.89 | 15.05 W | 8.42 |
+| DLA1, fp16 | 126.50 | 126.50 | 7.90 | 15.06 W | 8.40 |
+| DLA0+DLA1, fp16 | 202.89 | 101.44 | 9.86 | 19.11 W | 10.62 |
+| DLA0, INT8 | 244.57 | 244.57 | 4.09 | 13.40 W | 18.25 |
+| DLA0+DLA1, INT8 | **252.88** | 126.44 | 7.91 | 15.06 W | 16.79 |
+
+Findings:
+
+1. **In fp16 the two engines do scale: 1.601x** (202.89 vs 126.70). This contradicts §6b, where
+   `qkv_q` went *backwards* on two engines (539.8 vs 592.4 qps). Both are correct: §6b's workload
+   reads 83.89 MB of weights per inference and saturated DRAM alone, ResNet-18 at batch 1 does
+   not. So §6b's "the two DLA engines do not scale with each other" is true of bandwidth-bound
+   work only, and must not be stated unqualified. Corrected here.
+2. **In INT8 the scaling collapses to 1.034x** (252.88 vs 244.57). INT8 makes one engine 1.93x
+   faster (244.57 vs 126.70), which is enough to reach the shared ceiling by itself, so the second
+   engine adds 3%. The ceiling is ~253 qps and both precisions run into it: fp16 approaches it
+   with two engines, INT8 reaches it with one.
+3. **The two engines are identical to 0.15%** (126.695 vs 126.502 qps). No core lottery.
+4. **The GPU still wins decisively, in both throughput and energy, even against DLA's best mode.**
+   1360.3 qps vs 252.88 is 5.4x; 60.5 inf/J vs 18.25 is 3.3x. The DLA is marketed as the efficient
+   offload engine and is, on this workload, neither faster nor cheaper per inference. §6's verdict
+   is unaffected and this is now true at INT8 as well as fp16.
+5. **Concurrency stops lowering energy once it stops buying throughput.** Project 006 (P7) found
+   that raising concurrency lowers energy per unit work. That holds here in fp16 (8.42 ->
+   10.62 inf/J, +26%) and **reverses in INT8** (18.25 -> 16.79, -8%), because the second engine
+   costs 1.66 W and returns 3% more work. P7's claim needs this boundary condition: it holds while
+   the added concurrency still converts into throughput, and not past the ceiling.
+
+### Contention: the DLA is not free capacity alongside the GPU
+
+The DLA's remaining argument is running while the GPU serves something else. Measured directly
+against the real workload rather than a synthetic one: `llama-server`, Qwen3-14B Q4_K_M, 4
+concurrent streams, `n_predict` 64, on the same module.
+
+| Arm | LLM tok/s | DLA agg qps | VDD_IN |
+|---|---|---|---|
+| LLM alone | 17.07 | — | 25.68 W |
+| LLM + DLA0+DLA1, fp16 | 9.39 (-45%) | 79.64 (-61%) | 24.99 W |
+| LLM + DLA0+DLA1, INT8 | 9.35 (-45%) | 47.95 (-81%) | 24.95 W |
+
+6. **Both sides lose heavily and total power does not rise.** Expressed as fractions of each
+   side's solo rate, the fp16 combination delivers 0.550 + 0.393 = **0.943** of one workload's
+   worth of work, and the INT8 combination **0.738**. Heterogeneous concurrency on this module is
+   **sub-additive**: you would get more total work done by time-slicing the two jobs than by
+   running them together. This reproduces §6b's conclusion against a real LLM instead of a
+   synthetic GEMM, and extends it from "no gain" to "a measured loss".
+7. **INT8 is worse than fp16 under contention** (47.95 vs 79.64 qps) despite being 1.93x faster
+   alone. The likely mechanism is that the QDQ graph leaves more work off the DLA - 70 Quantize
+   and 110 Dequantize nodes, 16 DLA placements - so the INT8 engine depends more on the GPU it is
+   now competing with. Inferred, not isolated.
+
+### Limits of this section
+
+- **The INT8 model's accuracy was never measured and must not be claimed.** It was quantized with
+  32 batches of *random* calibration tensors purely to place QDQ nodes, which is valid for
+  throughput and meaningless for correctness.
+- Neither engine is pure DLA: residual adds (`ELEMENTWISE`), the flatten and the final matmul fall
+  back to the GPU in both precisions, so part of every DLA figure is fallback and sync overhead.
+- The LLM rates are coarse. Only completed requests count, so at 4 streams x 64 tokens the
+  quantum is one request (~1.07 tok/s, roughly +-6%); the two `llm_only` runs returning an
+  identical 17.07 tok/s reflects that granularity, not precision. The DLA figures are from
+  `trtexec` over thousands of iterations and are tight (power sd <= 0.08 W over 54-57 samples).
+- `llama-server` held its model resident in every arm including the DLA-only ones, so idle is
+  7.9-8.4 W rather than the 5.9 W of a bare module. Deltas are unaffected; absolutes include it.
+- A first attempt at these arms was discarded: the live dashboard was driving the LLM throughout,
+  the GPU sat at 993/1000, and DLA fp16 read 43.45 qps instead of 126.70. The 2.9x error was
+  caught by the power rail, not by the throughput number.
+
+### Reproduction
+
+```sh
+# on node2 (Orin NX)
+cd ~/dla-trt11
+./qvenv/bin/python quant.py          # symmetric QDQ INT8; needs QuantizeBias=False for TRT
+python3 dla_sweep.py                 # GPU / DLA0 / DLA1 / both, with rails
+python3 dla_arms.py                  # INT8 arms + LLM contention arms
+```
+
+`--int8` and `--fp16` do not exist in TensorRT 11.3: it is strongly typed, so precision comes from
+the ONNX graph and INT8 requires a QDQ model. ONNX Runtime's default asymmetric quantization is
+rejected by TRT for DLA (`Non-zero zero point is not supported`), and its Int32 bias quantization
+is rejected too (`input has type Int32`); `ActivationSymmetric`, `WeightSymmetric` and
+`QuantizeBias: False` are all three required.
+
 ## 8. Open
 
 - Does `kADJUST_FOR_DLA` (available, left `Disabled` in all runs) change any rejection?
 - What exactly does DLA compile error 8 object to in a 1×1 conv at W>1? The limit is undocumented
   and is not the 8192 non-batch cap.
-- Is any *compute*-bound workload (high arithmetic intensity, small weights) additive across DLA
-  and GPU? Every workload measured here was bandwidth-bound, so the concurrency result should not
-  be over-generalized to e.g. large-batch CNN inference with heavy weight reuse.
+- ~~Is any *compute*-bound workload additive across DLA and GPU?~~ **Answered in §6c:**
+  across the two DLA engines, yes — ResNet-18 at batch 1 scales 1.601x in fp16. But the
+  additivity is bounded by a shared ~253 qps ceiling, and INT8 reaches that ceiling on one
+  engine, so the same workload scales 1.034x in INT8. Across DLA *and* GPU it remains
+  sub-additive against a real LLM (0.943 fp16, 0.738 INT8).
 - `p512_attn_core`: build was still running.

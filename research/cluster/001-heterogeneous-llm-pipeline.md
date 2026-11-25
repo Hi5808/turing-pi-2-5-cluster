@@ -45,7 +45,7 @@ exists across the chassis, and no single node holds more than 31 GB.
   fp16/int8, and no attention support. Feed-forward projections may be expressible as
   convolutions; attention almost certainly is not. A prior result on this hardware showed DLA
   works only via a side-by-side TensorRT 11.3 install, with ResNet-18 at 139 qps / 7.2 ms.
-  **Being answered in project 003** — see research/003.
+  **Being answered in project 003** — see [research/jetson-orin/003](../jetson-orin/003-dla-transformer-offload.md).
 - Does llama.cpp's RPC backend tolerate heterogeneous backends per stage (CUDA on one, CUDA+DLA
   or CPU on another), or does it assume uniform backends?
 - What is the per-hop latency floor over the backplane, and how many tokens of pipelining are

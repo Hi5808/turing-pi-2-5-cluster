@@ -59,7 +59,7 @@ consumption.
    each slot's power independently. That turns a *single* external meter into per-node attribution
    by differencing: meter the board input, then power nodes off one at a time and subtract. No
    per-node sensor is required.
-3. This also bounds what [research/006](../research/006-batching-power-inversion.md) can claim. Its
+3. This also bounds what [research/006](../../research/jetson-orin/006-batching-power-inversion.md) can claim. Its
    finding that module power *falls* as concurrency rises is measured on the two Jetsons only. The
    board-level question — whether it survives the PSU's own conversion losses — needs the meter
    below.

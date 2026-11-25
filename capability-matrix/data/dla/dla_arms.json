@@ -1,0 +1,132 @@
+[
+ {
+  "arm": "int8_dla0",
+  "wall_s": 57.7,
+  "power": {
+   "n": 57,
+   "vdd_in": 13.401,
+   "vdd_in_sd": 0.049,
+   "cpu_gpu": 5.358,
+   "cpu_gpu_sd": 0.034,
+   "soc": 3.444,
+   "soc_sd": 0.013
+  },
+  "dla": [
+   {
+    "dev": "dla0",
+    "qps": 244.566,
+    "mean_ms": 4.08777
+   }
+  ],
+  "dla_agg_qps": 244.57
+ },
+ {
+  "arm": "int8_dla0+dla1",
+  "wall_s": 57.6,
+  "power": {
+   "n": 57,
+   "vdd_in": 15.062,
+   "vdd_in_sd": 0.049,
+   "cpu_gpu": 6.549,
+   "cpu_gpu_sd": 0.031,
+   "soc": 3.615,
+   "soc_sd": 0.017
+  },
+  "dla": [
+   {
+    "dev": "dla0",
+    "qps": 126.437,
+    "mean_ms": 7.90804
+   },
+   {
+    "dev": "dla1",
+    "qps": 126.44,
+    "mean_ms": 7.90791
+   }
+  ],
+  "dla_agg_qps": 252.88
+ },
+ {
+  "arm": "llm_only",
+  "wall_s": 60.0,
+  "power": {
+   "n": 59,
+   "vdd_in": 25.676,
+   "vdd_in_sd": 0.527,
+   "cpu_gpu": 14.971,
+   "cpu_gpu_sd": 0.347,
+   "soc": 4.465,
+   "soc_sd": 0.089
+  },
+  "llm": {
+   "tokens": 1024,
+   "requests": 16,
+   "tok_s": 17.07,
+   "streams": 4
+  }
+ },
+ {
+  "arm": "llm+dla0+dla1_fp16",
+  "wall_s": 54.5,
+  "power": {
+   "n": 54,
+   "vdd_in": 24.989,
+   "vdd_in_sd": 0.114,
+   "cpu_gpu": 12.955,
+   "cpu_gpu_sd": 0.086,
+   "soc": 5.118,
+   "soc_sd": 0.031
+  },
+  "dla": [
+   {
+    "dev": "dla0",
+    "qps": 39.8204,
+    "mean_ms": 25.1117
+   },
+   {
+    "dev": "dla1",
+    "qps": 39.8204,
+    "mean_ms": 25.1115
+   }
+  ],
+  "dla_agg_qps": 79.64,
+  "llm": {
+   "tokens": 512,
+   "requests": 8,
+   "tok_s": 9.39,
+   "streams": 4
+  }
+ },
+ {
+  "arm": "llm+dla0+dla1_int8",
+  "wall_s": 54.8,
+  "power": {
+   "n": 54,
+   "vdd_in": 24.953,
+   "vdd_in_sd": 0.546,
+   "cpu_gpu": 14.606,
+   "cpu_gpu_sd": 0.35,
+   "soc": 4.334,
+   "soc_sd": 0.112
+  },
+  "dla": [
+   {
+    "dev": "dla0",
+    "qps": 23.974,
+    "mean_ms": 41.7108
+   },
+   {
+    "dev": "dla1",
+    "qps": 23.9736,
+    "mean_ms": 41.7114
+   }
+  ],
+  "dla_agg_qps": 47.95,
+  "llm": {
+   "tokens": 512,
+   "requests": 8,
+   "tok_s": 9.35,
+   "streams": 4
+  }
+ }
+]

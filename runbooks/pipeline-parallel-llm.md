@@ -2,7 +2,7 @@
 
 Runs one model split across node2 (Orin NX) and node3 (Orin Nano), orchestrated by node1. Use this
 when a model does not fit a single node — **and only then**: splitting a model that already fits
-costs 4% (dense) to 18.5% (MoE). Measurements in [research/002](../research/002-pipeline-parallel-measurements.md).
+costs 4% (dense) to 18.5% (MoE). Measurements in [research/002](../research/cluster/002-pipeline-parallel-measurements.md).
 
 ## Prerequisites (one-time, already done)
 

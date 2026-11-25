@@ -18,9 +18,9 @@ than expected. Pinning one context per core is worth nothing over letting the sc
 them (82.1 vs 82.2 fps).
 
 This is the third engine on this cluster to show the same signature as the Orin NX's DLA in
-[003](003-dla-transformer-offload.md): a fixed-function accelerator that does not scale linearly
+[003](../jetson-orin/003-dla-transformer-offload.md): a fixed-function accelerator that does not scale linearly
 with engine count, where aggregate throughput comes from concurrency rather than from widening a
-single inference. It is also the same conclusion project [001](001-heterogeneous-llm-pipeline.md)
+single inference. It is also the same conclusion project [001](../cluster/001-heterogeneous-llm-pipeline.md)
 reached for LLM decode — batching is the throughput lever — arrived at on unrelated hardware and
 a different workload.
 

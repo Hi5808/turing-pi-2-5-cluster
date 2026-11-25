@@ -1,0 +1,121 @@
+[
+ {
+  "arm": "gpu_1",
+  "procs": 1,
+  "ok": 0,
+  "agg_qps": 0.0,
+  "per": [
+   {
+    "dev": "gpu",
+    "qps": 0.0,
+    "error": "[E] Error[4]: IRuntime::deserializeCudaEngineV2: Error Code 4: API Usage Error (Failed to read header from the stream: read 0 out of 32 bytes. In parsePlanHeade"
+   }
+  ],
+  "power": {
+   "n": 0
+  }
+ },
+ {
+  "arm": "dla0_1",
+  "procs": 1,
+  "ok": 1,
+  "agg_qps": 126.69,
+  "per": [
+   {
+    "dev": "dla0",
+    "qps": 126.695,
+    "mean_ms": 7.89185
+   }
+  ],
+  "power": {
+   "n": 57,
+   "vdd_in": 15.052,
+   "vdd_in_sd": 0.029,
+   "cpu_gpu": 4.368,
+   "cpu_gpu_sd": 0.017,
+   "soc": 4.461,
+   "soc_sd": 0.015
+  }
+ },
+ {
+  "arm": "dla1_1",
+  "procs": 1,
+  "ok": 1,
+  "agg_qps": 126.5,
+  "per": [
+   {
+    "dev": "dla1",
+    "qps": 126.502,
+    "mean_ms": 7.90397
+   }
+  ],
+  "power": {
+   "n": 57,
+   "vdd_in": 15.057,
+   "vdd_in_sd": 0.035,
+   "cpu_gpu": 4.37,
+   "cpu_gpu_sd": 0.028,
+   "soc": 4.493,
+   "soc_sd": 0.003
+  }
+ },
+ {
+  "arm": "dla0+dla1",
+  "procs": 2,
+  "ok": 2,
+  "agg_qps": 202.89,
+  "per": [
+   {
+    "dev": "dla0",
+    "qps": 101.444,
+    "mean_ms": 9.85642
+   },
+   {
+    "dev": "dla1",
+    "qps": 101.442,
+    "mean_ms": 9.85666
+   }
+  ],
+  "power": {
+   "n": 57,
+   "vdd_in": 19.113,
+   "vdd_in_sd": 0.036,
+   "cpu_gpu": 5.822,
+   "cpu_gpu_sd": 0.029,
+   "soc": 5.701,
+   "soc_sd": 0.02
+  }
+ },
+ {
+  "arm": "gpu+dla0+dla1",
+  "procs": 3,
+  "ok": 2,
+  "agg_qps": 203.3,
+  "per": [
+   {
+    "dev": "gpu",
+    "qps": 0.0,
+    "error": "[E] Error[4]: IRuntime::deserializeCudaEngineV2: Error Code 4: API Usage Error (Failed to read header from the stream: read 0 out of 32 bytes. In parsePlanHeade"
+   },
+   {
+    "dev": "dla0",
+    "qps": 101.651,
+    "mean_ms": 9.8365
+   },
+   {
+    "dev": "dla1",
+    "qps": 101.648,
+    "mean_ms": 9.83661
+   }
+  ],
+  "power": {
+   "n": 57,
+   "vdd_in": 19.169,
+   "vdd_in_sd": 0.083,
+   "cpu_gpu": 5.84,
+   "cpu_gpu_sd": 0.023,
+   "soc": 5.711,
+   "soc_sd": 0.039
+  }
+ }
+]
