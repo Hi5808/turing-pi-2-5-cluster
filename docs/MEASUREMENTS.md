@@ -249,7 +249,13 @@ reaped when the viewer leaves. Verified in all three states:
 | polled 18x | 999 | 76 C | 28.15 W |
 | 40 s after last poll | 0 | 73 C | 8.21 W |
 
-`live.py` is not version controlled (its directory is not a git repo); it lives on node1 at
-`/mnt/nvme/share/studio/research/live.py` with a timestamped `.bak` of the unpatched file.
+`live.py` is now **in this repository** at
+[`capability-matrix/scripts/bench/cluster/live.py`](../capability-matrix/scripts/bench/cluster/live.py)
+(added 2026-11-25; it had been living only on node1, where its directory is not a git repo). The
+copy carries the gate, and its docstring records both the 9-hour incident and the fact that it
+binds `0.0.0.0` with no authentication -- `GET /set?n=8` starts eight decode streams per module for
+anyone who can reach the port, which is fine on a trusted lab LAN and not safe to expose. The
+running node1 copy stays at `/mnt/nvme/share/studio/research/live.py` with a timestamped `.bak` of
+the unpatched file.
 
 **Before trusting any idle or power figure, check `gpu_load` and the rail, not `uptime`.**
