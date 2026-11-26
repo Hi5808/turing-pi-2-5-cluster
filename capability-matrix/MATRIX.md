@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 47 | 53% |
+| ✅ WORKS | 48 | 53% |
 | 🟡 PARTIAL | 11 | 12% |
 | ❌ FAILS | 17 | 19% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 10% |
-| **Total** | **89** | |
+| **Total** | **90** | |
 
 ## A compute
 
@@ -44,7 +44,7 @@
 | A23 | CPU throughput (sysbench, 1 thread / all threads) | orin-nano-8g | 3 | ✅ WORKS | MEASURED | 759 / 4472 events/s | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 | A24 | CPU memory read bandwidth, all threads (sysbench) | mixed |  | ✅ WORKS | MEASURED | NX 96.8, Nano 70.2, RK1 56.7 GB/s (GiB-based MiB/s) | [2026-09-24_cpu-and-memory-cross-chip](logs/2026-09-24_cpu-and-memory-cross-chip.md) |
 | A25 | Concurrent inference contexts (2+) | rk3588 | 1 | ❌ FAILS | MEASURED | Mali G610: 1 Vulkan context works (decode 9.08 tok/s, Qwen3-0.6B Q4_K_M); a 2nd concurrent context aborts ALL processes with vk::DeviceLostError (waitForFences ErrorDeviceLost) in libggml-vulkan. Not the ~1.2GiB ceiling: 2x378MiB |  |
-| A26 | Concurrency beats width at equal resources | rk3588 | 1 | ✅ WORKS | MEASURED | node1 CPU, total thread budget fixed at 8: aggregate decode 35.07 / 53.24 / 57.62 tok/s at 1 / 2 / 3 processes (-t 8/4/2). 3 narrow inferences beat 1 wide one by 1.64x; prefill 94.01 -> 152.35 (1.62x) |  |
+| A26 | Concurrency beats width at equal resources | rk3588 | 1 | ✅ WORKS | MEASURED | node1 CPU at a constant HOMOGENEOUS budget of 3x A76 (cpu4,5,6): 43.122 tok/s for 1 stream x 3 threads vs 48.538 for 3 streams x 1 thread = 1.126x, both sd <1%, 5 reps. Width 1->3 cores scales 2.518x of 3x (84%). |  |
 | A27 | Two DLA engines scale with each other | orin-nx-16g | 2 | 🟡 PARTIAL | MEASURED | ResNet-18 b1 fp16: 126.70 -> 202.89 qps on 1 -> 2 engines (1.601x). INT8: 244.57 -> 252.88 (1.034x). conv_pure (strict DLA, 0 GPU layers): 627.73 -> 1133.80 qps (1.806x) |  |
 | A28 | DLA INT8 faster than fp16 | orin-nx-16g | 2 | ✅ WORKS | MEASURED | ResNet-18 b1, 1 engine: 244.57 qps / 4.09 ms INT8 vs 126.70 qps / 7.89 ms fp16 = 1.93x; power 13.40 W vs 15.05 W |  |
 | A29 | DLA adds capacity alongside a busy GPU | orin-nx-16g | 2 | ❌ FAILS | MEASURED | llama-server Qwen3-14B Q4_K_M 4 streams: 17.07 tok/s alone -> 9.39 tok/s (-45%) with both DLA engines, while DLA falls 202.89 -> 79.64 qps (-61%). Fractions sum to 0.943 (fp16) and 0.738 (INT8) |  |
@@ -57,6 +57,7 @@
 | A36 | Aggregate tok/s detects serving failure | any |  | ❌ FAILS | MEASURED | Past the 16-slot limit ITL p95 stays FLAT (417/419/418 ms) while TTFT p95 goes 980ms -> 41.3s -> 41.5s and the slowest stream falls to 0.19 tok/s, all while aggregate reads a healthy 61 tok/s |  |
 | A37 | Efficiency optimum is a shippable operating point | any |  | ❌ FAILS | MEASURED | tok/J peaks at 1.536 (32 streams) where TTFT p95 is 41.5s; the SLO-respecting knee runs at 0.936 tok/J. Serving users costs 1.64x the energy per token of benchmarking |  |
 | A38 | Round-robin is fair across heterogeneous nodes | any |  | ❌ FAILS | MEASURED | Nano/4B plateaus 43.4 tok/s vs NX/14B 17.9 tok/s, so the same service hands one user 7.1 tok/s and the next 17.0. The smaller module carries 2.42x the throughput |  |
+| A46 | Per-submit serial cost isolated on a second engine (CPU) | rk3588 | 1 | ✅ WORKS | MEASURED | Fit t(n)=S+W/n on a WIDTH sweep only (17.100/31.398/43.050 tok/s at 1/2/3 A76 cores): S=5.485 ms/token serial, W=52.965, R2=1.0000, serial share 23.7%. Predicts the unseen CONCURRENCY curve to +0.2% (k=1) and +5.7% (k=3). |  |
 
 ## B cluster
 
