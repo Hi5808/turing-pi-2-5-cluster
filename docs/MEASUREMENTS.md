@@ -204,3 +204,52 @@ KV cache per token, from GGUF metadata (`2 * n_layer * n_head_kv * n_embd_head *
 
 Qwen3-32B KV transfer vs prefill: 2048 tok = 536.9 MB = 5.11 s against 28.6 s of prefill (~18%).
 Transfer is affordable; it was never the blocker. Capacity is: 32B w8a8 exceeds node1's 31 GB.
+
+### The dashboard was a measurement contaminant for 9 hours (2026-11-25)
+
+`live.py` on node1 is a demo dashboard for the [006](../research/jetson-orin/006-batching-power-inversion.md)
+batching-power inversion. Its load generators were **not gated on an attached viewer**: two threads
+per Orin fired a fresh 48-token completion the instant the previous returned, with
+`cache_prompt: False` so every one re-ran prefill.
+
+A forgotten `nohup python3 live.py 8096` was found still doing this after **9 h 06 m** (PPID 1, in
+no crontab and no unit). State when caught:
+
+| Node | tj | VDD_IN | gpu_load | loadavg |
+|---|---|---|---|---|
+| orinnx | **98 C** | 30.2 W | 999 | 0.21 |
+| node1 | 72 C (soc) | — | — | 3.10 |
+| orin1 | 64 C | — | — | 5.85 |
+
+Two things make this worth recording.
+
+**It was invisible to the usual check.** orinnx read `loadavg 0.21` while pinned, because the work
+was entirely in CUDA and never touched a CPU runqueue. `ps` showed llama-server at 2.2% CPU. Only
+`gpu_load`, the INA3221 rail and the server's own task counter (221,909) showed it. A node can be
+fully loaded and look idle.
+
+**98 C is past the trip but not throttling.** tj trip points are 35 / 74 / **95** / 104 C. Every
+`*-throttle-alert` cooling device still read `cur=0` and both CPU clusters sat at 1984 MHz, so
+clocks were not clamped; `hot-surface-alert` was the only one tripped, and `pwm-fan` was at state
+2 of 3. So a sustained 98 C here is not self-limiting — do not assume the thermal governor will
+save a long run.
+
+This load is the contaminant behind the 28.56 W "idle" baseline voided in
+[003 §5](../research/jetson-orin/003-dla-transformer-offload.md), and behind the SIGTERM stalls
+first misattributed to "aged instances" in matrix row A44 — the trigger is an in-flight stream,
+and this dashboard supplies one continuously.
+
+**Fixed** by gating every generator on a recent page poll (`IDLE_GRACE = 30 s`, stamped in
+`do_GET` for `/` and `/state`); the `npu_live.py` subprocess is no longer spawned unwatched and is
+reaped when the viewer leaves. Verified in all three states:
+
+| State | orinnx gpu_load | orinnx tj | orinnx VDD_IN |
+|---|---|---|---|
+| unwatched, server up 2 min | 0 | 67 C | 7.93 W |
+| polled 18x | 999 | 76 C | 28.15 W |
+| 40 s after last poll | 0 | 73 C | 8.21 W |
+
+`live.py` is not version controlled (its directory is not a git repo); it lives on node1 at
+`/mnt/nvme/share/studio/research/live.py` with a timestamped `.bak` of the unpatched file.
+
+**Before trusting any idle or power figure, check `gpu_load` and the rail, not `uptime`.**
