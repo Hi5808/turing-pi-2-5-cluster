@@ -8,9 +8,9 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 48 | 53% |
+| ✅ WORKS | 49 | 54% |
 | 🟡 PARTIAL | 11 | 12% |
-| ❌ FAILS | 17 | 19% |
+| ❌ FAILS | 16 | 18% |
 | 🔌 NEEDS-HW | 5 | 6% |
 | ⬜ UNTESTED | 9 | 10% |
 | **Total** | **90** | |
@@ -128,7 +128,7 @@
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 | A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
 | A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted twice. Unit returns enabled+active, NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. Pre-Linux cost 199 s -> 123 s after TimeoutStopSec=15; time to service ready 214 s -> 141 s |  |
-| A44 | llama-server stops cleanly on SIGTERM | any |  | ❌ FAILS | MEASURED | An in-flight STREAMING request is necessary for the stall: idle / 1-completed / 24-completed requests never stalled (0 of 6 configs, 0.24-1.36 s). With a stream in flight: 120.26 s (orin1 systemd b10533), 30.58 s (orinnx manual b10362), but 1.49 s and 0.41 s in two other configs |  |
+| A44 | llama-server stops cleanly on SIGTERM | any |  | ✅ WORKS | MEASURED | ISOLATED 2026-11-25. Necessary condition: an in-flight SSE stream that is IDLE in rd.next() when SIGTERM lands (~25%: 5/20 arms on default, 3/14 with the ping at 5s). Duration is governed by sse_ping_interval, proved by intervention: default 30 -> 30.43/30.32/30.32/30.29/30.27 s; --sse-ping-interval 5 -> 6.34/6.35/5.38 s. Never an intermediate value. Inside a caught stall all 9 surviving threads sit in futex_wait_queue, the listener thread is already gone, the client socket stays ESTAB, and the server log gap between 'cleaning up before exit' and 'cancel task' is exactly 30.0034 s, after which exit takes 164 ms. |  |
 | A45 | Reboot cost is dominated by the OS | orin-nano-8g | 3 | ❌ FAILS | MEASURED | Attributed from the persistent journal: OS shutdown 16 s, Tegra firmware/bootloader 107 s, Linux boot 33.0 s. Firmware alone is 66% of the 161 s between reboot command and a booted kernel+userspace |  |
 
 ## G reliability
