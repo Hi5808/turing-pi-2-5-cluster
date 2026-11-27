@@ -112,3 +112,26 @@ when every big core is claimed.
 
 **Guards:** 5 reps minimum, per-rep values printed so bimodality is visible, and a spare core left
 for the OS where the budget allows.
+
+## 11. A function cannot hand back a background PID
+
+`p=$(run_something_in_background)` runs the function body in a **command-substitution subshell**.
+The job becomes a grandchild of the script, so the parent's `wait "$p"` fails with "not a child"
+and the script races straight on. In `e7`'s first version this launched all 20 arms at once instead
+of one at a time, orphaned ~20 `llama-completion` processes on an 8-core board (loadavg **22.69**),
+and reported `FAIL` for every arm because the parser read incomplete files.
+
+**Guard:** launch in the current shell and capture `$!` there — a helper may *set* a variable
+(`LASTPID=$!`) but must never be called through `$( )` to obtain one.
+
+This is the **third** variant of the same root cause in one day, alongside bare `wait` (pitfall 5)
+and `EXIT` traps inherited by subshells (also 5). All three left hardware running: a 3 h 46 m hang
+with a managed service down, a mid-test service restart that voided two GPU arms, and an orphan
+storm. **Shell job control is the most dangerous part of this work** — more dangerous than any
+measurement error, because the failures keep the cluster busy rather than stopping it.
+
+Before running any new script here, check all three:
+
+- no bare `wait` — collect PIDs, `wait "$p"` each
+- every backgrounded subshell begins `trap - EXIT`
+- no `$( )` around anything that backgrounds a job

@@ -44,8 +44,12 @@ echo "  --- stragglers (reported, NOT killed) ---"
 ps -eo pid,etime,args --no-headers 2>/dev/null |
   awk '$0 ~ /llama-server|llama-completion|npu_live|live\.py/ && $0 !~ /awk/ {printf "    %s %s %.90s\n", $1, $2, $3" "$4" "$5" "$6}' |
   head -8
-S=$(ps -eo args --no-headers 2>/dev/null | grep -cE "llama-completion|npu_live\.py")
-echo "    load generators still alive: $S"
+# Count by PID from ps itself, NOT with a grep whose pattern sits in this script's own command
+# line -- doing that self-matched and reported "1" on three idle nodes (pitfall 6, which this very
+# script documented before falling for it). The managed llama-server is expected and excluded.
+S=$(ps -eo pid,args --no-headers 2>/dev/null | awk '
+  $0 ~ /llama-completion|npu_live/ && $0 !~ /awk|grep|idle_verify/ {n++} END{print n+0}')
+echo "    unexpected load generators: $S   (managed llama-server excluded; expected 0)"
 echo "  --- managed service ---"
 if systemctl list-unit-files llama-server.service >/dev/null 2>&1; then
   echo "    llama-server: $(systemctl is-active llama-server)  (expected: active)"

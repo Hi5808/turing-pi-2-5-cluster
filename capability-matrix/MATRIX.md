@@ -8,12 +8,12 @@
 
 | Status | Rows | Share |
 |---|---:|---:|
-| ✅ WORKS | 49 | 54% |
+| ✅ WORKS | 52 | 55% |
 | 🟡 PARTIAL | 11 | 12% |
-| ❌ FAILS | 16 | 18% |
-| 🔌 NEEDS-HW | 5 | 6% |
-| ⬜ UNTESTED | 9 | 10% |
-| **Total** | **90** | |
+| ❌ FAILS | 18 | 19% |
+| 🔌 NEEDS-HW | 5 | 5% |
+| ⬜ UNTESTED | 9 | 9% |
+| **Total** | **95** | |
 
 ## A compute
 
@@ -58,6 +58,10 @@
 | A37 | Efficiency optimum is a shippable operating point | any |  | ❌ FAILS | MEASURED | tok/J peaks at 1.536 (32 streams) where TTFT p95 is 41.5s; the SLO-respecting knee runs at 0.936 tok/J. Serving users costs 1.64x the energy per token of benchmarking |  |
 | A38 | Round-robin is fair across heterogeneous nodes | any |  | ❌ FAILS | MEASURED | Nano/4B plateaus 43.4 tok/s vs NX/14B 17.9 tok/s, so the same service hands one user 7.1 tok/s and the next 17.0. The smaller module carries 2.42x the throughput |  |
 | A46 | Per-submit serial cost isolated on a second engine (CPU) | rk3588 | 1 | ✅ WORKS | MEASURED | Fit t(n)=S+W/n on a WIDTH sweep only (17.100/31.398/43.050 tok/s at 1/2/3 A76 cores): S=5.485 ms/token serial, W=52.965, R2=1.0000, serial share 23.7%. Predicts the unseen CONCURRENCY curve to +0.2% (k=1) and +5.7% (k=3). |  |
+| A47 | Per-submit serial cost present on the RK3588 NPU (3rd engine) | rk3588 | 1 | ✅ WORKS | MEASURED | Width sweep by core mask, 1 context on n cores: 35.59/44.12/63.90 fps at n=1/2/3 (5 reps). Fit t(n)=S+W/n gives S=11.827 ms serial, W=16.874 ms, R2=0.8796, serial share 67.8% at 3 cores. Predicts the unseen 3-context concurrency arm at 104.53 vs 96.11 measured (+8.8%). |  |
+| A48 | big.LITTLE: one A55 core in a thread set costs ~26-32% of decode | rk3588 | 1 | ❌ FAILS | MEASURED | Qwen3-0.6B Q4_K_M CPU-only, 3 reps, taskset per cluster: 4xA76 46.81 tok/s; +1xA55 31.83 (-32.0%); +2xA55 34.89 (-25.5%); +4xA55 34.41 (-26.5%). 4xA55 alone 12.39. A76/A55 ratio at equal core count 3.78x. Width on A76: 17.13/31.33/41.60/46.81 at n=1..4. |  |
+| A49 | Orin Nano: GPU vs CPU decode, 4.29x throughput at lower power | orin-nano-8g | 3 | ✅ WORKS | MEASURED | Same binary (074f1f3), same model, same flags, -c 2048 --parallel 4. k=1: CPU 9.34 tok/s @13.33 W (0.701 tok/J) vs GPU 20.38 @12.57 W (1.621). k=4: CPU 21.47 @12.72 W (1.688) vs GPU 92.12 @12.55 W (7.340). Idle 6.731 W. GPU is 4.29x throughput and 4.35x tok/J at 4 streams, at LOWER package power. |  |
+| A50 | Cold start is 95% one opaque load block, and not disk-bound | orin-nx-16g | 2 | ✅ WORKS | MEASURED | Qwen3-14B-Q4_K_M (8.4 GB), 2 reps, phases from llama-server's own timestamps: GPU cold 0.006/7.609/0.411/0.018 = 8.044 s total (open/load/ctxinit/slots); GPU warm 8.350 s; CPU cold 25.428 s; CPU warm 27.150 s. |  |
 
 ## B cluster
 
@@ -128,8 +132,9 @@
 | A41 | Carrier provides a performance capability the modules lack | any |  | ❌ FAILS | MEASURED | Neither of the two testable carrier features qualifies: switch = commodity 1GbE line rate, shared store = 22x slower than disks already present on every node |  |
 | A42 | Staging models on local NVMe cuts model load time | any |  | ✅ WORKS | MEASURED | Cold start to HTTP 200 on /health, caches dropped before each arm: Qwen3-14B (8.38 GiB) 81.50 s from NFS vs 9.81 s from local NVMe = 8.31x, saving 71.7 s per cold start |  |
 | A43 | LLM service survives a reboot unattended | orin-nano-8g | 3 | ✅ WORKS | MEASURED | node3 rebooted twice. Unit returns enabled+active, NRestarts=0, health 200, still serving the LOCAL staged model, k3s Ready, generation verified. Pre-Linux cost 199 s -> 123 s after TimeoutStopSec=15; time to service ready 214 s -> 141 s |  |
-| A44 | llama-server stops cleanly on SIGTERM | any |  | ✅ WORKS | MEASURED | ISOLATED 2026-11-25. Necessary condition: an in-flight SSE stream that is IDLE in rd.next() when SIGTERM lands (~25%: 5/20 arms on default, 3/14 with the ping at 5s). Duration is governed by sse_ping_interval, proved by intervention: default 30 -> 30.43/30.32/30.32/30.29/30.27 s; --sse-ping-interval 5 -> 6.34/6.35/5.38 s. Never an intermediate value. Inside a caught stall all 9 surviving threads sit in futex_wait_queue, the listener thread is already gone, the client socket stays ESTAB, and the server log gap between 'cleaning up before exit' and 'cancel task' is exactly 30.0034 s, after which exit takes 164 ms. |  |
+| A44 | llama-server stops cleanly on SIGTERM | any |  | ❌ FAILS | MEASURED | ISOLATED and STILL PRESENT ON CURRENT MASTER. Necessary condition: an in-flight SSE stream idle in rd.next() when SIGTERM lands (~25%: 5/20 arms on b10533, 2/6 on a 074f1f3 build of 2026-11-26). Duration governed by sse_ping_interval, proved by intervention: default 30 -> 30.43/30.32/30.32/30.29/30.27 s and 31.46/31.48 s on master; --sse-ping-interval 5 -> 6.34/6.35/5.38 s. Never an intermediate value. Inside a caught stall all 9 surviving threads sit in futex_wait_queue, the listener thread is gone, the client socket stays ESTAB, and the log gap between 'cleaning up before exit' and 'cancel task' is exactly 30.0034 s, then exit in 164 ms. |  |
 | A45 | Reboot cost is dominated by the OS | orin-nano-8g | 3 | ❌ FAILS | MEASURED | Attributed from the persistent journal: OS shutdown 16 s, Tegra firmware/bootloader 107 s, Linux boot 33.0 s. Firmware alone is 66% of the 161 s between reboot command and a booted kernel+userspace |  |
+| A51 | Sustained single-module load does NOT throttle: 86 C plateau, clocks at max | orin-nx-16g | 2 | ✅ WORKS | MEASURED | 2 concurrent streams, 600 s: tj plateaus 84-86 C, GPU held 1173 MHz (min=max, never clamped), CPU 1984 MHz, 27.04-27.12 W, fan 2/3 (not maxed), ALL eight *-throttle-alert cooling devices 0 throughout. Settled to tj 73 C / 8.13 W / gpu_load 0. |  |
 
 ## G reliability
 
