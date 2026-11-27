@@ -87,6 +87,52 @@ min = max = mean**, soc 44-55 °C, bigcore0 45-60 °C. Neither clock reduction n
 throttling occurs at any point, which matches the independent 5-minute all-core soak recorded in
 matrix row F06 (RK1 2256 MHz, 62 °C, no throttling).
 
+## 6. The same method on the NPU: a second engine on this chip (2026-11-26)
+
+The width method applies anywhere a single inference can be given more or less hardware. The
+RK3588 NPU exposes core masks, so the same fit can be made there — and the DLA's depth method
+cannot be used on this box at all: only `yolov5s_relu_rk3588.rknn` exists and the installed
+`rknn-toolkit-lite2` is runtime-only, with the converter being x86-only.
+
+YOLOv5s-relu int8 @640, one `RKNNLite` context given 1, 2 or 3 cores, 200 iterations after 20
+warm-up, 5 repetitions. Measurements in `selfmodel.db` run `b092dcc83380`; harness
+[`suite/e1_npu_per_submit.py`](../../capability-matrix/scripts/bench/suite/e1_npu_per_submit.py).
+
+| arm | cores | throughput | sd |
+|---|--:|--:|--:|
+| width, 1 context | 1 | 35.59 fps | 5.8% |
+| width, 1 context | 2 | 44.12 | 9.5% |
+| width, 1 context | 3 | 63.90 | 0.8% |
+| concurrency, 3 contexts, 1 core each | 3 | **96.11** | 1.4% |
+
+```
+fit on width only:  S = 11.827 ms serial   W = 16.874 ms parallel   R2 = 0.8796
+serial share at 3 cores: 67.8%             width 1->3: 1.796x of an ideal 3x
+out-of-sample k=3:  predicted 104.53   measured 96.11   +8.8%
+```
+
+**The serial share predicts the concurrency gain, across two engines of unrelated design:**
+
+| engine | serial share | concurrency gain at a constant budget | over-prediction |
+|---|--:|--:|--:|
+| CPU, 3x A76 (§Results) | 23.7% | 1.126x | +5.7% |
+| NPU, 3 cores | 67.8% | **1.504x** (63.90 -> 96.11) | +8.8% |
+
+That is a quantitative relation, not just a shared sign: the more of an engine's per-inference time
+is serial, the more concurrency buys, and the larger the residual interference. It independently
+reproduces [005](005-rk3588-npu-cnn.md)'s 1.41x (82.2 vs 58.4 fps) with a different harness.
+
+**Weaker than the CPU case, and the paper should not pretend otherwise.** R² is 0.8796 against
+1.0000 on the CPU, so `t(n) = S + W/n` describes the NPU only approximately, and the `n=2` point is
+the noisiest arm (sd 9.5 %) — which is where that fit error concentrates. More repetitions at `n=2`
+are needed before the NPU's S is quoted as a figure rather than an order of magnitude.
+
+**One arm was discarded as mislabelled.** A `k=1` concurrency arm pinned to a *single* core rather
+than the full three-core budget the formula assumes, so its reported +57.3 % "error" was a harness
+bug, and the 2.639x "gain" it produced compared one core against three rather than a constant
+budget. The valid constant-budget comparison is one inference on three cores (63.90) against three
+inferences on one core each (96.11).
+
 ## Findings
 
 1. **A fixed serial segment exists on this CPU and is 5.485 ms/token**, 23.7% of per-token time at

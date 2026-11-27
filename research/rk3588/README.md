@@ -17,6 +17,7 @@ silently offloaded to Mali. See [010](010-cpu-per-submit-serial-cost.md) Correct
 | [004](004-rk3588-npu-llm.md) | The RK3588 NPU cannot run transformer attention; the published decode figure does not reproduce | complete |
 | [005](005-rk3588-npu-cnn.md) | What the NPU does do, measured on CNNs, including the 3-core utilisation ceiling | complete |
 | [010](010-cpu-per-submit-serial-cost.md) | The per-submit serial cost isolated on the A76 CPU: fit it from thread width, test it against concurrency. Withdraws the 1.64x concurrency figure for 1.126x | complete |
+| [011](011-big-little-thread-barrier.md) | One A55 core taxes a whole A76 decode by 26-32%, and it is a step not a slope. Threads cannot reach the little cluster's 12.3 tok/s; one process per cluster recovers 97.2% of it | complete |
 
 Upstream engagement from 004/005 is tracked in
 [../../capability-matrix/papers/README.md](../../capability-matrix/papers/README.md).

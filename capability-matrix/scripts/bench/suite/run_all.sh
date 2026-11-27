@@ -67,6 +67,22 @@ run_one () {                      # $1 = experiment id
   # strip the RKNN banner spam that otherwise buries e1's actual table
   grep -vE "^(I|W) RKNN:|^W Query dynamic range" "$OUT/$e.txt" | tail -24
   echo "  [$e exit $rc, full log $OUT/$e.txt]"
+
+  # --- record into selfmodel.db, ALWAYS, as part of the run ---------------------------------
+  # The five experiments of 2026-11-26 were run, reported in conversation, and nearly lost: their
+  # only copies were /tmp logs that get cleared, and the matrix rows were typed afterwards from
+  # memory of the numbers. Recording is part of the experiment now, not an afterthought.
+  # node1 owns the database, so the output is shipped there regardless of where it ran.
+  scp -q "$OUT/$e.txt" "node1:/tmp/suite_$e.txt" 2>/dev/null
+  scp -q "$HERE/record.py" "node1:/tmp/record.py" 2>/dev/null
+  if ssh node1 "cd /mnt/nvme/share/studio/research && python3 /tmp/record.py $e /tmp/suite_$e.txt" \
+       >> "$OUT/recorded.txt" 2>&1; then
+    echo "  [$e recorded to selfmodel.db]"
+  else
+    echo "  [$e NOT RECORDED -- see $OUT/recorded.txt. A run that is not recorded did not happen:"
+    echo "   fix the parser in record.py rather than leaving the result only in this log.]"
+    tail -2 "$OUT/recorded.txt" | sed 's/^/     /'
+  fi
   return $rc
 }
 
@@ -102,6 +118,15 @@ for n in "${NODES[@]}"; do
   wait "${PIDS[$n]}" 2>/dev/null        # pitfall 5: explicit PIDs, never bare wait
   echo "--- $n finished ---"; cat "$OUT/node-$n.txt"
 done
+
+echo
+echo "=== recorded measurements ==="
+if [ -f "$OUT/recorded.txt" ]; then
+  grep -cE "^recorded run" "$OUT/recorded.txt" | xargs -I{} echo "  {} experiment(s) written to selfmodel.db"
+  grep -E "^REFUSING|^recorded run" "$OUT/recorded.txt" | sed 's/^/  /'
+else
+  echo "  NOTHING RECORDED -- no experiment reached the recorder."
+fi
 
 echo
 echo "=== idle verification ==="
